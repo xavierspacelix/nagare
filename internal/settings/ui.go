@@ -7,6 +7,17 @@ var settingsHTML = `<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Nagare Settings</title>
 <style>
+.confirm-dialog {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.4); display: flex;
+  align-items: center; justify-content: center; z-index: 100;
+}
+.confirm-box {
+  background: var(--color-surface); border-radius: var(--radius-lg);
+  padding: var(--space-6); max-width: 400px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+}
+.confirm-actions { display: flex; gap: var(--space-3); justify-content: flex-end; margin-top: var(--space-4); }
 :root {
   --color-accent: #5B5FF8;
   --color-accent-dark: #4347E7;
@@ -210,12 +221,64 @@ input[type="range"]::-webkit-slider-thumb {
 <script>
 let settings = {};
 let mappings = [];
+let profiles = [];
+let activeProfileId = 1;
 
 async function loadSettings() {
   const res = await fetch('/api/settings');
   settings = await res.json();
   const mr = await fetch('/api/mappings');
   mappings = await mr.json();
+  const pr = await fetch('/api/profiles');
+  profiles = await pr.json();
+  if (profiles.length > 0) {
+    activeProfileId = profiles[0].id;
+    for (const p of profiles) {
+      if (settings.camera_id === '' && p.name === 'Default') {
+        activeProfileId = p.id;
+        break;
+      }
+    }
+  }
+  render();
+}
+
+async function switchProfile(id) {
+  activeProfileId = id;
+  const mr = await fetch('/api/mappings?profile_id=' + id);
+  mappings = await mr.json();
+  if (mappings.length === 0) {
+    const fallback = await fetch('/api/mappings?profile_id=1');
+    mappings = await fallback.json();
+  }
+  render();
+}
+
+async function addProfile() {
+  const name = prompt('Profile name:');
+  if (!name) return;
+  const res = await fetch('/api/profiles', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({name: name, description: '', is_default: false}),
+  });
+  if (res.ok) {
+    const pr = await fetch('/api/profiles');
+    profiles = await pr.json();
+    render();
+  }
+}
+
+async function deleteProfile(id) {
+  if (!confirm('Delete this profile? Mappings will be lost.')) return;
+  await fetch('/api/profiles?id=' + id, {method: 'DELETE'});
+  if (activeProfileId === id) {
+    activeProfileId = 1;
+    const mr = await fetch('/api/mappings?profile_id=1');
+    mappings = await mr.json();
+  }
+  const pr = await fetch('/api/profiles');
+  profiles = await pr.json();
   render();
 }
 
@@ -305,7 +368,7 @@ function bindEvents() {
 }
 
 function sectionsHTML() {
-  return generalSection() + cameraSection() + gesturesSection() + mappingsSection() + systemSection();
+  return generalSection() + profileSection() + cameraSection() + gesturesSection() + mappingsSection() + systemSection();
 }
 
 const gestureNames = [
@@ -325,12 +388,46 @@ function toggleHTML(key, value) {
 }
 
 function generalSection() {
+  const profileOpts = profiles.map(p =>
+    '<option value="' + p.id + '"' + (p.id === activeProfileId ? ' selected' : '') + '>' + escapeHtml(p.name) + '</option>'
+  ).join('');
   return '<div class="card">' +
     '<div class="card-title">General</div>' +
     field('Launch on startup', 'Automatically start Nagare when you log in', toggleHTML('startup_enabled', settings.startup_enabled)) +
     field('Start minimized', 'Launch Nagare to the tray without showing the window', toggleHTML('start_minimized', settings.start_minimized)) +
     field('Minimize to tray', 'Minimize the settings window to the tray instead of quitting', toggleHTML('minimize_to_tray', settings.minimize_to_tray)) +
+    '<div class="field"><div><div class="field-label">Active Profile</div><div class="field-desc">Switch between gesture profiles</div></div>' +
+    '<select onchange="switchProfile(parseInt(this.value))" style="min-width:160px;">' + profileOpts + '</select></div>' +
   '</div>';
+}
+
+function profileSection() {
+  const list = profiles.map(p => {
+    const isActive = p.id === activeProfileId;
+    const isDefault = p.is_default;
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:var(--space-2) 0;' +
+      (!isActive ? 'opacity:0.6;' : '') + '">' +
+      '<div><strong>' + escapeHtml(p.name) + '</strong>' +
+      (p.description ? '<div style="font-size:12px;color:var(--color-text-muted);">' + escapeHtml(p.description) + '</div>' : '') +
+      '</div>' +
+      '<div style="display:flex;gap:var(--space-2);">' +
+      (!isActive ? '<button class="btn btn-secondary" style="padding:4px 10px;font-size:12px;" onclick="switchProfile(' + p.id + ')">Switch</button>' : '') +
+      (!isDefault && !isActive ? '<button class="btn btn-danger" style="padding:4px 10px;font-size:12px;" onclick="deleteProfile(' + p.id + ')">Delete</button>' : '') +
+      '</div></div>';
+  }).join('');
+
+  return '<div class="card">' +
+    '<div class="card-title">Gesture Profiles</div>' +
+    '<div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:var(--space-4);">' +
+    'Profiles let you switch between different gesture configurations instantly.</div>' +
+    list +
+    '<div style="margin-top:var(--space-3);padding-top:var(--space-3);border-top:1px solid var(--color-border);">' +
+    '<button class="btn btn-secondary" onclick="addProfile()">+ New Profile</button></div>' +
+  '</div>';
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 function cameraSection() {

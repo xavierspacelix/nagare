@@ -62,27 +62,39 @@ func main() {
 	eng := actions.NewEngine(ctrl, logger)
 	prof := profiler.New()
 
-	mappingStore := gestures.NewMappingStore()
-	if repoMappings, err := repo.GetGestureMappings(); err == nil {
-		custom := make([]gestures.Mapping, 0, len(repoMappings))
-		for _, rm := range repoMappings {
-			g, ok := gestures.GestureFromName(rm.GestureName)
-			if !ok {
-				continue
-			}
-			a, ok := gestures.ActionFromName(rm.ActionName)
-			if !ok {
-				continue
-			}
-			state := models.GestureActive
-			if rm.OnState == "end" {
-				state = models.GestureEnd
-			}
-			custom = append(custom, gestures.Mapping{Gesture: g, Action: a, OnState: state})
+	loadMappings := func(profileID int) {
+		mappingStore := gestures.NewMappingStore()
+		repoMappings, err := repo.GetGestureMappingsByProfile(profileID)
+		if err != nil || len(repoMappings) == 0 {
+			repoMappings, err = repo.GetGestureMappingsByProfile(1)
 		}
-		mappingStore.SetCustom(custom)
+		if err == nil {
+			custom := make([]gestures.Mapping, 0, len(repoMappings))
+			for _, rm := range repoMappings {
+				g, ok := gestures.GestureFromName(rm.GestureName)
+				if !ok {
+					continue
+				}
+				a, ok := gestures.ActionFromName(rm.ActionName)
+				if !ok {
+					continue
+				}
+				state := models.GestureActive
+				if rm.OnState == "end" {
+					state = models.GestureEnd
+				}
+				custom = append(custom, gestures.Mapping{Gesture: g, Action: a, OnState: state})
+			}
+			mappingStore.SetCustom(custom)
+		}
+		eng.SetMappings(mappingStore)
 	}
-	eng.SetMappings(mappingStore)
+
+	profileID, _ := svc.GetActiveProfileID()
+	if profileID == 0 {
+		profileID = 1
+	}
+	loadMappings(profileID)
 
 	machineCfg := gestures.DefaultConfig()
 	machine := gestures.NewMachine(machineCfg, eng.Handle, logger)

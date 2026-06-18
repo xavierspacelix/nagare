@@ -509,6 +509,90 @@ func TestCooldown_DoesNotInterruptActive(t *testing.T) {
 	}
 }
 
+func TestMappingStore_FallbackToDefault(t *testing.T) {
+	ms := NewMappingStore()
+
+	action, ok := ms.Lookup(models.GesturePinch, models.GestureActive)
+	if !ok {
+		t.Fatal("expected default mapping found")
+	}
+	if action != ActionLeftClick {
+		t.Fatalf("expected left_click, got %s", action)
+	}
+}
+
+func TestMappingStore_CustomOverridesDefault(t *testing.T) {
+	ms := NewMappingStore()
+	ms.SetCustom([]Mapping{
+		{Gesture: models.GesturePinch, Action: ActionRightClick, OnState: models.GestureActive},
+	})
+
+	action, ok := ms.Lookup(models.GesturePinch, models.GestureActive)
+	if !ok {
+		t.Fatal("expected custom mapping found")
+	}
+	if action != ActionRightClick {
+		t.Fatalf("expected right_click, got %s", action)
+	}
+}
+
+func TestMappingStore_CustomNotFound(t *testing.T) {
+	ms := NewMappingStore()
+	ms.SetCustom([]Mapping{
+		{Gesture: models.GesturePinch, Action: ActionLeftClick, OnState: models.GestureActive},
+	})
+
+	_, ok := ms.Lookup(models.GestureSwipeLeft, models.GestureActive)
+	if !ok {
+		t.Fatal("expected fallback to default")
+	}
+}
+
+func TestMappingStore_GetCustom(t *testing.T) {
+	ms := NewMappingStore()
+	if ms.GetCustom() != nil {
+		t.Fatal("expected nil initially")
+	}
+
+	custom := []Mapping{
+		{Gesture: models.GesturePinch, Action: ActionLeftClick, OnState: models.GestureActive},
+	}
+	ms.SetCustom(custom)
+	if len(ms.GetCustom()) != 1 {
+		t.Fatal("expected 1 custom mapping")
+	}
+}
+
+func TestGestureFromName(t *testing.T) {
+	g, ok := GestureFromName("pinch")
+	if !ok {
+		t.Fatal("expected gesture found")
+	}
+	if g != models.GesturePinch {
+		t.Fatalf("expected pinch, got %s", g)
+	}
+
+	_, ok = GestureFromName("nonexistent")
+	if ok {
+		t.Fatal("expected not found")
+	}
+}
+
+func TestActionFromName(t *testing.T) {
+	a, ok := ActionFromName("left_click")
+	if !ok {
+		t.Fatal("expected action found")
+	}
+	if a != ActionLeftClick {
+		t.Fatalf("expected left_click, got %s", a)
+	}
+
+	_, ok = ActionFromName("nonexistent")
+	if ok {
+		t.Fatal("expected not found")
+	}
+}
+
 func TestMachine_EventHandler(t *testing.T) {
 	events := []models.GestureEvent{}
 	m := NewMachine(DefaultConfig(), func(e models.GestureEvent) {
