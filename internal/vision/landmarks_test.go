@@ -114,13 +114,13 @@ func TestDetectOrientation(t *testing.T) {
 
 func TestDefaultLandmarkConfig(t *testing.T) {
 	cfg := DefaultLandmarkConfig()
-	if cfg.InputWidth != 224 {
-		t.Fatalf("expected InputWidth 224, got %d", cfg.InputWidth)
+	if cfg.InputWidth != 256 {
+		t.Fatalf("expected InputWidth 256, got %d", cfg.InputWidth)
 	}
-	if cfg.InputHeight != 224 {
-		t.Fatalf("expected InputHeight 224, got %d", cfg.InputHeight)
+	if cfg.InputHeight != 256 {
+		t.Fatalf("expected InputHeight 256, got %d", cfg.InputHeight)
 	}
-	if cfg.ModelPath != "assets/models/hand_landmark.onnx" {
+	if cfg.ModelPath != "assets/models/hand_landmark_detector.onnx" {
 		t.Fatalf("unexpected model path: %s", cfg.ModelPath)
 	}
 }

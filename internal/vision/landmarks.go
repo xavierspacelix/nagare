@@ -16,10 +16,10 @@ type LandmarkConfig struct {
 
 func DefaultLandmarkConfig() LandmarkConfig {
 	return LandmarkConfig{
-		ModelPath:   "assets/models/hand_landmark.onnx",
+		ModelPath:   "assets/models/hand_landmark_detector.onnx",
 		Confidence:  0.5,
-		InputWidth:  224,
-		InputHeight: 224,
+		InputWidth:  256,
+		InputHeight: 256,
 	}
 }
 

@@ -59,17 +59,21 @@ func (e *dnnExtractor) Extract(frame *ProcessedFrame) (*models.HandData, error) 
 	)
 	defer blob.Close()
 
-	e.net.SetInput(blob, "")
-	output := e.net.Forward("")
-	defer output.Close()
+	e.net.SetInput(blob, "image")
 
-	data, err := output.DataPtrFloat32()
+	lm := e.net.Forward("landmarks")
+	defer lm.Close()
+
+	sc := e.net.Forward("scores")
+	defer sc.Close()
+
+	data, err := lm.DataPtrFloat32()
 	if err != nil {
-		return nil, fmt.Errorf("get output data: %w", err)
+		return nil, fmt.Errorf("get landmarks data: %w", err)
 	}
 
 	if len(data) < 63 {
-		return nil, fmt.Errorf("unexpected output size: %d, expected at least 63", len(data))
+		return nil, fmt.Errorf("unexpected landmarks size: %d, expected at least 63", len(data))
 	}
 
 	var landmarks [21]models.HandLandmark
@@ -81,7 +85,16 @@ func (e *dnnExtractor) Extract(frame *ProcessedFrame) (*models.HandData, error) 
 		}
 	}
 
-	confidence := float64(data[63])
+	scores, err := sc.DataPtrFloat32()
+	if err != nil {
+		return nil, fmt.Errorf("get scores data: %w", err)
+	}
+
+	confidence := 0.5
+	if len(scores) > 0 {
+		confidence = float64(scores[0])
+	}
+
 	handData := &models.HandData{
 		Landmarks:   landmarks,
 		Confidence:  confidence,
