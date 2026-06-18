@@ -6,22 +6,28 @@ import (
 
 	"nagare/internal/actions"
 	"nagare/internal/camera"
+	"nagare/internal/controller"
+	"nagare/internal/display"
 	"nagare/internal/gestures"
 	"nagare/internal/profiler"
 	"nagare/internal/vision"
+	"nagare/models"
 )
 
 type Runner struct {
-	camera   *camera.Manager
-	pipeline *vision.Pipeline
-	landmark vision.LandmarkExtractor
-	overlay  *vision.DebugOverlay
-	machine  *gestures.Machine
+	camera    *camera.Manager
+	pipeline  *vision.Pipeline
+	landmark  vision.LandmarkExtractor
+	overlay   *vision.DebugOverlay
+	machine   *gestures.Machine
 	engine   *actions.Engine
-	profiler *profiler.Profiler
-	logger   *slog.Logger
+	ctrl      controller.OSController
+	profiler  *profiler.Profiler
+	display   *display.Mapper
+	logger    *slog.Logger
 
 	running  bool
+	tracking bool
 	stopCh   chan struct{}
 }
 
@@ -32,7 +38,9 @@ func NewRunner(
 	ov *vision.DebugOverlay,
 	mc *gestures.Machine,
 	eng *actions.Engine,
+	ctrl controller.OSController,
 	prof *profiler.Profiler,
+	dm *display.Mapper,
 	logger *slog.Logger,
 ) *Runner {
 	if logger == nil {
@@ -45,7 +53,9 @@ func NewRunner(
 		overlay:  ov,
 		machine:  mc,
 		engine:   eng,
+		ctrl:     ctrl,
 		profiler: prof,
+		display:  dm,
 		logger:   logger,
 		stopCh:   make(chan struct{}),
 	}
@@ -59,6 +69,12 @@ func (r *Runner) Start() error {
 	if !r.camera.IsOpen() {
 		if err := r.camera.Open(0); err != nil {
 			return err
+		}
+	}
+
+	if r.display != nil {
+		if err := r.display.Refresh(); err != nil {
+			r.logger.Warn("display refresh failed", "error", err)
 		}
 	}
 
@@ -119,6 +135,9 @@ func (r *Runner) loop() {
 
 		if handData != nil {
 			r.machine.Process(handData)
+			if r.tracking {
+				r.moveCursor(handData)
+			}
 		}
 
 		r.profiler.TrackLatency(time.Since(latencyStart))
@@ -134,7 +153,39 @@ func (r *Runner) loop() {
 	}
 }
 
+func (r *Runner) moveCursor(data *models.HandData) {
+	if data == nil || len(data.Landmarks) < 9 {
+		return
+	}
+
+	indexTip := data.Landmarks[8]
+
+	nx := indexTip.X / 224.0
+	ny := indexTip.Y / 224.0
+
+	if nx < 0 {
+		nx = 0
+	} else if nx > 1 {
+		nx = 1
+	}
+	if ny < 0 {
+		ny = 0
+	} else if ny > 1 {
+		ny = 1
+	}
+
+	if r.display != nil {
+		sx, sy := r.display.NormalizeToActive(nx, ny)
+		r.ctrl.MoveMouse(sx, sy)
+	} else {
+		sx := int(nx * 1920)
+		sy := int(ny * 1080)
+		r.ctrl.MoveMouse(sx, sy)
+	}
+}
+
 func (r *Runner) SetTracking(active bool) {
+	r.tracking = active
 	r.engine.SetTracking(active)
 	if r.overlay != nil {
 		r.overlay.SetTracking(active)

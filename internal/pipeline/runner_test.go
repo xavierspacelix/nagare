@@ -7,36 +7,32 @@ import (
 	"nagare/internal/actions"
 	"nagare/internal/camera"
 	"nagare/internal/controller"
+	"nagare/internal/display"
 	"nagare/internal/gestures"
 	"nagare/internal/profiler"
 	"nagare/internal/vision"
 )
 
-func TestNewRunner(t *testing.T) {
-	logger := slog.Default()
+func newTestRunner(logger *slog.Logger) *Runner {
 	cm := camera.NewManager(logger)
 	pl := vision.NewPipeline(vision.DefaultConfig())
 	ctrl := controller.NewStubController()
 	eng := actions.NewEngine(ctrl, logger)
 	prof := profiler.New()
 	mc := gestures.NewMachine(gestures.DefaultConfig(), eng.Handle, logger)
+	dm := display.NewMapper(display.NewDiscoverer())
+	return NewRunner(cm, pl, nil, nil, mc, eng, ctrl, prof, dm, logger)
+}
 
-	r := NewRunner(cm, pl, nil, nil, mc, eng, prof, logger)
+func TestNewRunner(t *testing.T) {
+	r := newTestRunner(slog.Default())
 	if r == nil {
 		t.Fatal("expected non-nil runner")
 	}
 }
 
 func TestRunner_StartStop(t *testing.T) {
-	logger := slog.Default()
-	cm := camera.NewManager(logger)
-	pl := vision.NewPipeline(vision.DefaultConfig())
-	ctrl := controller.NewStubController()
-	eng := actions.NewEngine(ctrl, logger)
-	prof := profiler.New()
-	mc := gestures.NewMachine(gestures.DefaultConfig(), eng.Handle, logger)
-
-	r := NewRunner(cm, pl, nil, nil, mc, eng, prof, logger)
+	r := newTestRunner(slog.Default())
 
 	if r.IsRunning() {
 		t.Fatal("expected not running initially")
@@ -65,8 +61,9 @@ func TestRunner_SetTracking(t *testing.T) {
 	eng := actions.NewEngine(ctrl, logger)
 	prof := profiler.New()
 	mc := gestures.NewMachine(gestures.DefaultConfig(), eng.Handle, logger)
+	dm := display.NewMapper(display.NewDiscoverer())
 
-	r := NewRunner(cm, pl, nil, nil, mc, eng, prof, logger)
+	r := NewRunner(cm, pl, nil, nil, mc, eng, ctrl, prof, dm, logger)
 	r.SetTracking(true)
 
 	if !eng.IsTracking() {

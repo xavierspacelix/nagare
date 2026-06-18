@@ -8,9 +8,9 @@ Update this file after every completed feature. Any AI agent reading this should
 
 **Phase:** Phase 4 — OS Control Layer
 
-**Last Completed:** 19 Custom Gesture Mapping
+**Last Completed:** 20 Multi-Monitor Support
 
-**Next:** 20 Multi-Monitor Support
+**Next:** 21 Gesture Profiles
 
 ---
 
@@ -52,7 +52,7 @@ Update this file after every completed feature. Any AI agent reading this should
 ### Phase 6 — Advanced Features
 
 * [x] 19 Custom Gesture Mapping
-* [ ] 20 Multi-Monitor Support
+* [x] 20 Multi-Monitor Support
 * [ ] 21 Gesture Profiles
 
 ### Phase 7 — Cross Platform (macOS)
@@ -201,6 +201,6 @@ Examples:
 
 ```text
 Phase: Phase 1 — Foundation
-Progress: 19 / 24 Features Completed
+Progress: 20 / 24 Features Completed
 Next Milestone: MediaPipe Hand Tracking
 ```

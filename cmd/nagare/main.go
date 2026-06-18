@@ -12,6 +12,7 @@ import (
 	"nagare/internal/camera"
 	"nagare/internal/config"
 	"nagare/internal/controller"
+	"nagare/internal/display"
 	"nagare/internal/gestures"
 	"nagare/internal/logging"
 	"nagare/internal/pipeline"
@@ -86,7 +87,8 @@ func main() {
 	machineCfg := gestures.DefaultConfig()
 	machine := gestures.NewMachine(machineCfg, eng.Handle, logger)
 
-	pipe := pipeline.NewRunner(cm, pl, lm, ov, machine, eng, prof, logger)
+	dm := display.NewMapper(display.NewDiscoverer())
+	pipe := pipeline.NewRunner(cm, pl, lm, ov, machine, eng, ctrl, prof, dm, logger)
 
 	app := tray.New(logger)
 	app.SetOnOpenSettings(func() {
