@@ -2,6 +2,8 @@ package pipeline
 
 import (
 	"log/slog"
+	"sync"
+	"sync/atomic"
 	"time"
 
 	"nagare/internal/actions"
@@ -15,19 +17,20 @@ import (
 )
 
 type Runner struct {
-	camera    *camera.Manager
-	pipeline  *vision.Pipeline
-	landmark  vision.LandmarkExtractor
-	overlay   *vision.DebugOverlay
-	machine   *gestures.Machine
+	camera   *camera.Manager
+	pipeline *vision.Pipeline
+	landmark vision.LandmarkExtractor
+	overlay  *vision.DebugOverlay
+	machine  *gestures.Machine
 	engine   *actions.Engine
-	ctrl      controller.OSController
-	profiler  *profiler.Profiler
-	display   *display.Mapper
-	logger    *slog.Logger
+	ctrl     controller.OSController
+	profiler *profiler.Profiler
+	display  *display.Mapper
+	logger   *slog.Logger
 
-	running  bool
-	tracking bool
+	running  atomic.Bool
+	tracking atomic.Bool
+	mu       sync.Mutex
 	stopCh   chan struct{}
 }
 
@@ -62,7 +65,10 @@ func NewRunner(
 }
 
 func (r *Runner) Start() error {
-	if r.running {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if r.running.Load() {
 		return nil
 	}
 
@@ -72,13 +78,7 @@ func (r *Runner) Start() error {
 		}
 	}
 
-	if r.display != nil {
-		if err := r.display.Refresh(); err != nil {
-			r.logger.Warn("display refresh failed", "error", err)
-		}
-	}
-
-	r.running = true
+	r.running.Store(true)
 	r.stopCh = make(chan struct{})
 	go r.loop()
 	r.logger.Info("pipeline started")
@@ -86,17 +86,21 @@ func (r *Runner) Start() error {
 }
 
 func (r *Runner) Stop() {
-	if !r.running {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if !r.running.Load() {
 		return
 	}
-	r.running = false
+
+	r.running.Store(false)
 	close(r.stopCh)
 	r.camera.Close()
 	r.logger.Info("pipeline stopped")
 }
 
 func (r *Runner) IsRunning() bool {
-	return r.running
+	return r.running.Load()
 }
 
 func (r *Runner) loop() {
@@ -135,7 +139,7 @@ func (r *Runner) loop() {
 
 		if handData != nil {
 			r.machine.Process(handData)
-			if r.tracking {
+			if r.tracking.Load() {
 				r.moveCursor(handData)
 			}
 		}
@@ -185,7 +189,7 @@ func (r *Runner) moveCursor(data *models.HandData) {
 }
 
 func (r *Runner) SetTracking(active bool) {
-	r.tracking = active
+	r.tracking.Store(active)
 	r.engine.SetTracking(active)
 	if r.overlay != nil {
 		r.overlay.SetTracking(active)

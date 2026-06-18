@@ -17,11 +17,11 @@ const (
 type FingerName int
 
 const (
-	FingerThumb   FingerName = 0
-	FingerIndex   FingerName = 1
-	FingerMiddle  FingerName = 2
-	FingerRing    FingerName = 3
-	FingerPinky   FingerName = 4
+	FingerThumb  FingerName = 0
+	FingerIndex  FingerName = 1
+	FingerMiddle FingerName = 2
+	FingerRing   FingerName = 3
+	FingerPinky  FingerName = 4
 )
 
 type FingerState int

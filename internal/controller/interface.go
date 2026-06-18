@@ -1,5 +1,7 @@
 package controller
 
+import "nagare/internal/display"
+
 type OSController interface {
 	MoveMouse(x, y int) error
 	LeftClick() error
@@ -14,4 +16,5 @@ type OSController interface {
 	MediaNext() error
 	MediaPrevious() error
 	KeyTap(key string, modifiers ...string) error
+	GetMonitors() ([]display.Info, error)
 }

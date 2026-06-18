@@ -3,22 +3,23 @@ package vision
 import (
 	"fmt"
 	"log/slog"
+
 	"nagare/models"
 )
 
 type LandmarkConfig struct {
-	ModelPath     string
-	Confidence    float64
-	InputWidth    int
-	InputHeight   int
+	ModelPath   string
+	Confidence  float64
+	InputWidth  int
+	InputHeight int
 }
 
 func DefaultLandmarkConfig() LandmarkConfig {
 	return LandmarkConfig{
-		ModelPath:   "assets/models/hand_landmark.onnx",
+		ModelPath:   "assets/models/hand_landmark_detector.onnx",
 		Confidence:  0.5,
-		InputWidth:  224,
-		InputHeight: 224,
+		InputWidth:  256,
+		InputHeight: 256,
 	}
 }
 

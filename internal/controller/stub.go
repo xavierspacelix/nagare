@@ -1,5 +1,7 @@
 package controller
 
+import "nagare/internal/display"
+
 type StubController struct {
 	LastAction    string
 	LastX         int
@@ -81,4 +83,10 @@ func (s *StubController) KeyTap(key string, modifiers ...string) error {
 	s.LastKey = key
 	s.LastModifiers = modifiers
 	return nil
+}
+
+func (s *StubController) GetMonitors() ([]display.Info, error) {
+	return []display.Info{
+		{Index: 0, X: 0, Y: 0, Width: 1920, Height: 1080, Primary: true},
+	}, nil
 }

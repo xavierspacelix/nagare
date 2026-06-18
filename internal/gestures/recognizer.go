@@ -61,7 +61,14 @@ func (r *Recognizer) IsTwoFingersUp(data *models.HandData) bool {
 }
 
 func (r *Recognizer) IsTwoFingersDown(data *models.HandData) bool {
-	return r.IsTwoFingersUp(data)
+	if data == nil || len(data.Landmarks) < 21 || data.Confidence < 0.5 {
+		return false
+	}
+	indexDown := data.Landmarks[8].Y > data.Landmarks[6].Y+0.02
+	middleDown := data.Landmarks[12].Y > data.Landmarks[10].Y+0.02
+	ringUp := data.Landmarks[16].Y < data.Landmarks[14].Y-0.02
+	pinkyUp := data.Landmarks[20].Y < data.Landmarks[18].Y-0.02
+	return indexDown && middleDown && ringUp && pinkyUp
 }
 
 func (r *Recognizer) IsSwipeLeft(data *models.HandData) bool {

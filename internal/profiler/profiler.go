@@ -19,17 +19,17 @@ type Profiler struct {
 }
 
 type Snapshot struct {
-	FPS         float64
-	FrameTime   time.Duration
-	Latency     time.Duration
-	PeakLatency time.Duration
-	FrameCount  int64
-	MemAlloc    uint64
-	MemTotal    uint64
-	MemSys      uint64
-	NumGC       uint32
+	FPS          float64
+	FrameTime    time.Duration
+	Latency      time.Duration
+	PeakLatency  time.Duration
+	FrameCount   int64
+	MemAlloc     uint64
+	MemTotal     uint64
+	MemSys       uint64
+	NumGC        uint32
 	NumGoroutine int
-	Uptime      time.Duration
+	Uptime       time.Duration
 }
 
 var startTime = time.Now()
@@ -77,17 +77,17 @@ func (p *Profiler) Snapshot() Snapshot {
 	runtime.ReadMemStats(&m)
 
 	return Snapshot{
-		FPS:           p.fps,
-		FrameTime:     p.frameTime,
-		Latency:       p.latency,
-		PeakLatency:   p.peakLatency,
-		FrameCount:    p.frameCount,
-		MemAlloc:      m.Alloc,
-		MemTotal:      m.TotalAlloc,
-		MemSys:        m.Sys,
-		NumGC:         m.NumGC,
-		NumGoroutine:  runtime.NumGoroutine(),
-		Uptime:        time.Since(startTime),
+		FPS:          p.fps,
+		FrameTime:    p.frameTime,
+		Latency:      p.latency,
+		PeakLatency:  p.peakLatency,
+		FrameCount:   p.frameCount,
+		MemAlloc:     m.Alloc,
+		MemTotal:     m.TotalAlloc,
+		MemSys:       m.Sys,
+		NumGC:        m.NumGC,
+		NumGoroutine: runtime.NumGoroutine(),
+		Uptime:       time.Since(startTime),
 	}
 }
 

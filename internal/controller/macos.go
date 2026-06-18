@@ -4,6 +4,7 @@ package controller
 
 import (
 	"github.com/go-vgo/robotgo"
+	"nagare/internal/display"
 )
 
 func New() OSController {
@@ -12,63 +13,63 @@ func New() OSController {
 
 type MacController struct{}
 
-func (c *MacController) MoveMouse(x, y int) error {
+func (mc *MacController) MoveMouse(x, y int) error {
 	robotgo.MoveMouse(x, y)
 	return nil
 }
 
-func (c *MacController) LeftClick() error {
+func (mc *MacController) LeftClick() error {
 	return robotgo.Click("left")
 }
 
-func (c *MacController) RightClick() error {
+func (mc *MacController) RightClick() error {
 	return robotgo.Click("right")
 }
 
-func (c *MacController) MouseDown() error {
+func (mc *MacController) MouseDown() error {
 	return robotgo.MouseDown("left")
 }
 
-func (c *MacController) MouseUp() error {
+func (mc *MacController) MouseUp() error {
 	return robotgo.MouseUp("left")
 }
 
-func (c *MacController) Scroll(ticks int) error {
+func (mc *MacController) Scroll(ticks int) error {
 	robotgo.Scroll(0, ticks)
 	return nil
 }
 
-func (c *MacController) VolumeUp() error {
+func (mc *MacController) VolumeUp() error {
 	robotgo.KeyTap("audio_vol_up")
 	return nil
 }
 
-func (c *MacController) VolumeDown() error {
+func (mc *MacController) VolumeDown() error {
 	robotgo.KeyTap("audio_vol_down")
 	return nil
 }
 
-func (c *MacController) Mute() error {
+func (mc *MacController) Mute() error {
 	robotgo.KeyTap("audio_mute")
 	return nil
 }
 
-func (c *MacController) MediaPlayPause() error {
+func (mc *MacController) MediaPlayPause() error {
 	robotgo.KeyTap("audio_play")
 	return nil
 }
 
-func (c *MacController) MediaNext() error {
+func (mc *MacController) MediaNext() error {
 	robotgo.KeyTap("audio_next")
 	return nil
 }
 
-func (c *MacController) MediaPrevious() error {
+func (mc *MacController) MediaPrevious() error {
 	robotgo.KeyTap("audio_prev")
 	return nil
 }
 
-func (c *MacController) KeyTap(key string, modifiers ...string) error {
+func (mc *MacController) KeyTap(key string, modifiers ...string) error {
 	if len(modifiers) > 0 {
 		args := make([]interface{}, len(modifiers))
 		for i, m := range modifiers {
@@ -77,4 +78,31 @@ func (c *MacController) KeyTap(key string, modifiers ...string) error {
 		return robotgo.KeyTap(key, args...)
 	}
 	return robotgo.KeyTap(key)
+}
+
+func (mc *MacController) GetMonitors() ([]display.Info, error) {
+	num := robotgo.DisplaysNum()
+	monitors := make([]display.Info, 0, num)
+
+	for i := range num {
+		x, y, monW, monH := robotgo.GetDisplayBounds(i)
+		monitors = append(monitors, display.Info{
+			Index:   i,
+			X:       x,
+			Y:       y,
+			Width:   monW,
+			Height:  monH,
+			Primary: i == 0,
+		})
+	}
+
+	if len(monitors) == 0 {
+		sw, sh := robotgo.GetScreenSize()
+		monitors = append(monitors, display.Info{
+			Index: 0, X: 0, Y: 0,
+			Width: sw, Height: sh, Primary: true,
+		})
+	}
+
+	return monitors, nil
 }

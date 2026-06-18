@@ -1,7 +1,5 @@
 package display
 
-import "fmt"
-
 type Info struct {
 	Index   int
 	X, Y    int
@@ -10,30 +8,20 @@ type Info struct {
 	Primary bool
 }
 
-type Discoverer interface {
-	Discover() ([]Info, error)
+type MonitorProvider interface {
+	GetMonitors() ([]Info, error)
 }
 
 type Mapper struct {
-	discoverer Discoverer
-	monitors   []Info
-	activeIdx  int
+	monitors  []Info
+	activeIdx int
 }
 
-func NewMapper(d Discoverer) *Mapper {
-	return &Mapper{discoverer: d}
-}
-
-func (m *Mapper) Refresh() error {
-	monitors, err := m.discoverer.Discover()
-	if err != nil {
-		return err
-	}
+func NewMapper(monitors []Info) (*Mapper, error) {
 	if len(monitors) == 0 {
-		return fmt.Errorf("no monitors found")
+		monitors = []Info{{Index: 0, X: 0, Y: 0, Width: 1920, Height: 1080, Primary: true}}
 	}
-	m.monitors = monitors
-	return nil
+	return &Mapper{monitors: monitors}, nil
 }
 
 func (m *Mapper) Monitors() []Info {

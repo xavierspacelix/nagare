@@ -19,8 +19,9 @@ func newTestRunner(logger *slog.Logger) *Runner {
 	ctrl := controller.NewStubController()
 	eng := actions.NewEngine(ctrl, logger)
 	prof := profiler.New()
-	mc := gestures.NewMachine(gestures.DefaultConfig(), eng.Handle, logger)
-	dm := display.NewMapper(display.NewDiscoverer())
+	mc := gestures.NewMachine(gestures.DefaultConfig(), eng.HandleGesture, logger)
+	mon := []display.Info{{Index: 0, X: 0, Y: 0, Width: 1920, Height: 1080, Primary: true}}
+	dm, _ := display.NewMapper(mon)
 	return NewRunner(cm, pl, nil, nil, mc, eng, ctrl, prof, dm, logger)
 }
 
@@ -60,8 +61,8 @@ func TestRunner_SetTracking(t *testing.T) {
 	ctrl := controller.NewStubController()
 	eng := actions.NewEngine(ctrl, logger)
 	prof := profiler.New()
-	mc := gestures.NewMachine(gestures.DefaultConfig(), eng.Handle, logger)
-	dm := display.NewMapper(display.NewDiscoverer())
+	mc := gestures.NewMachine(gestures.DefaultConfig(), eng.HandleGesture, logger)
+	dm, _ := display.NewMapper(nil)
 
 	r := NewRunner(cm, pl, nil, nil, mc, eng, ctrl, prof, dm, logger)
 	r.SetTracking(true)

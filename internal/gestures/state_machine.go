@@ -39,8 +39,8 @@ type Machine struct {
 }
 
 type gestureState struct {
-	current  models.GestureState
-	since    time.Time
+	current models.GestureState
+	since   time.Time
 }
 
 func NewMachine(cfg Config, handler EventHandler, logger *slog.Logger) *Machine {
