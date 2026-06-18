@@ -4,11 +4,19 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"time"
 
+	"nagare/internal/actions"
+	"nagare/internal/camera"
 	"nagare/internal/config"
+	"nagare/internal/controller"
+	"nagare/internal/gestures"
 	"nagare/internal/logging"
+	"nagare/internal/pipeline"
+	"nagare/internal/profiler"
 	"nagare/internal/settings"
 	"nagare/internal/tray"
+	"nagare/internal/vision"
 )
 
 func main() {
@@ -32,8 +40,30 @@ func main() {
 
 	svc := settings.NewService(repo)
 	settingsServer := settings.NewServer(logger, svc)
-	app := tray.New(logger)
 
+	cm := camera.NewManager(logger)
+	pl := vision.NewPipeline(vision.DefaultConfig())
+	lm, err := vision.NewLandmarkExtractor(vision.DefaultLandmarkConfig(), logger)
+	if err != nil {
+		logger.Warn("landmark extractor not available", "error", err)
+		lm = nil
+	}
+
+	ov, err := vision.NewDebugOverlay(vision.DefaultOverlayConfig(), logger)
+	if err != nil {
+		logger.Warn("debug overlay not available", "error", err)
+		ov = nil
+	}
+
+	ctrl := controller.New()
+	eng := actions.NewEngine(ctrl, logger)
+	prof := profiler.New()
+	machineCfg := gestures.DefaultConfig()
+	machine := gestures.NewMachine(machineCfg, eng.Handle, logger)
+
+	pipe := pipeline.NewRunner(cm, pl, lm, ov, machine, eng, prof, logger)
+
+	app := tray.New(logger)
 	app.SetOnOpenSettings(func() {
 		url, err := settingsServer.Start()
 		if err != nil {
@@ -45,7 +75,29 @@ func main() {
 			logger.Error("failed to open browser", "error", err)
 		}
 	})
+	app.SetOnStart(func() {
+		if err := pipe.Start(); err != nil {
+			logger.Error("failed to start pipeline", "error", err)
+			return
+		}
+		pipe.SetTracking(true)
+		logger.Info("gesture control started")
+	})
+	app.SetOnStop(func() {
+		pipe.SetTracking(false)
+		pipe.Stop()
+		logger.Info("gesture control stopped")
+	})
+	app.SetOnRestart(func() {
+		pipe.Stop()
+		time.Sleep(500 * time.Millisecond)
+		if err := pipe.Start(); err != nil {
+			logger.Error("failed to restart pipeline", "error", err)
+		}
+		logger.Info("gesture control restarted")
+	})
 
+	logger.Info("nagare ready", "version", "0.1.0", "platform", runtime.GOOS)
 	app.Run()
 }
 

@@ -8,9 +8,9 @@ Update this file after every completed feature. Any AI agent reading this should
 
 **Phase:** Phase 4 — OS Control Layer
 
-**Last Completed:** 16 Runtime Profiling
+**Last Completed:** 18 Reliability Testing
 
-**Next:** 17 Pipeline Optimization
+**Next:** 19 Custom Gesture Mapping
 
 ---
 
@@ -46,8 +46,8 @@ Update this file after every completed feature. Any AI agent reading this should
 ### Phase 5 — Performance Optimization
 
 * [x] 16 Runtime Profiling
-* [ ] 17 Pipeline Optimization
-* [ ] 18 Reliability Testing
+* [x] 17 Pipeline Optimization
+* [x] 18 Reliability Testing
 
 ### Phase 6 — Advanced Features
 
@@ -201,6 +201,6 @@ Examples:
 
 ```text
 Phase: Phase 1 — Foundation
-Progress: 16 / 24 Features Completed
+Progress: 18 / 24 Features Completed
 Next Milestone: MediaPipe Hand Tracking
 ```

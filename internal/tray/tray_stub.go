@@ -21,9 +21,15 @@ func (a *App) Run() {
 		switch line {
 		case "1":
 			a.logger.Info("tray action", "action", ActionStart)
+			if a.onStart != nil {
+				a.onStart()
+			}
 			fmt.Println("→ Tracking started")
 		case "2":
 			a.logger.Info("tray action", "action", ActionStop)
+			if a.onStop != nil {
+				a.onStop()
+			}
 			fmt.Println("→ Tracking stopped")
 		case "3":
 			if a.onOpenSettings != nil {
@@ -32,6 +38,9 @@ func (a *App) Run() {
 			a.logger.Info("tray action", "action", ActionSettings)
 		case "4":
 			a.logger.Info("tray action", "action", ActionRestart)
+			if a.onRestart != nil {
+				a.onRestart()
+			}
 			fmt.Println("→ Engine restarted")
 		case "5":
 			a.logger.Info("tray action", "action", ActionCheckUpdates)
