@@ -8,9 +8,9 @@ Update this file after every completed feature. Any AI agent reading this should
 
 **Phase:** Phase 1 — Foundation
 
-**Last Completed:** 07 MediaPipe Hand Tracking
+**Last Completed:** 08 Debug Overlay
 
-**Next:** 08 Debug Overlay
+**Next:** 09 Gesture State Machine
 
 ---
 
@@ -28,7 +28,7 @@ Update this file after every completed feature. Any AI agent reading this should
 * [x] 05 Camera Engine
 * [x] 06 OpenCV Processing Pipeline
 * [x] 07 MediaPipe Hand Tracking
-* [ ] 08 Debug Overlay
+* [x] 08 Debug Overlay
 
 ### Phase 3 — Gesture Engine
 
@@ -201,6 +201,6 @@ Examples:
 
 ```text
 Phase: Phase 1 — Foundation
-Progress: 7 / 24 Features Completed
+Progress: 8 / 24 Features Completed
 Next Milestone: MediaPipe Hand Tracking
 ```
