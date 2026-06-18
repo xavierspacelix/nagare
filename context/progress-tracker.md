@@ -129,7 +129,7 @@ Target:
 
 ## Decisions Made During Build
 
-* Chose MediaPipe Tasks Vision over legacy MediaPipe Graph API.
+* GoCV v0.30.0 required for OpenCV 4.6.0 (Ubuntu Noble). v0.32.1+ uses `cv::aruco::ArucoDetector` from OpenCV 4.7.0+ which does not exist in 4.6.0 headers.
 * Chose ONNX Runtime for local inference execution.
 * Chose RobotGo for desktop automation layer.
 * Chose getlantern/systray for system tray on Windows/macOS.
@@ -141,7 +141,7 @@ Target:
 
 ## Known Issues
 
-*Add active issues here.*
+* Camera `TestOpenClose` and `TestReadFrame` fail on Linux without webcam — expected, OpenCV returns "can't open camera" error. Tests still validate the error path.
 
 Example:
 

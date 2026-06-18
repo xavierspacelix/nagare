@@ -5,6 +5,7 @@ go 1.26.4
 require (
 	github.com/getlantern/systray v1.2.2
 	github.com/spf13/viper v1.21.0
+	gocv.io/x/gocv v0.30.0
 	modernc.org/sqlite v1.52.0
 )
 
