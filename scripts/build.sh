@@ -59,10 +59,24 @@ build_windows() {
 
 build_windows_msys2() {
   echo "==> Building for Windows 11 (native MSYS2 MinGW)..."
-  echo "    NOTE: Requires MSYS2 with mingw-w64-<env>-opencv installed"
-  echo "    Also requires Go on PATH (system or MSYS2)"
-  echo "    Ensure PKG_CONFIG_PATH points to mingw pkgconfig"
+  echo "    NOTE: Requires MSYS2 with mingw-w64-<env>-opencv and Go on PATH"
+  echo "    Ensure PKG_CONFIG_PATH points to mingw pkgconfig, e.g.:"
+  echo "      export PATH=\"/ucrt64/bin:\$PATH\""
+  echo "      export PKG_CONFIG_PATH=/ucrt64/lib/pkgconfig"
   ensure_output
+
+  CGOFLAGS="$(pkg-config --cflags opencv4 2>/dev/null || true)"
+  CGOLIBS="$(pkg-config --libs opencv4 2>/dev/null || true)"
+
+  if [ -z "$CGOFLAGS" ]; then
+    echo "    WARNING: pkg-config didn't find opencv4, trying /ucrt64/include/opencv4"
+    CGOFLAGS="-I/ucrt64/include/opencv4"
+    CGOLIBS="-lopencv_world460"
+  fi
+
+  CGO_CFLAGS="$CGOFLAGS" \
+  CGO_CXXFLAGS="$CGOFLAGS" \
+  CGO_LDFLAGS="$CGOLIBS" \
   CC=gcc CGO_ENABLED=1 go build -tags '!stub' -o "$OUTPUT_DIR/${APP}.exe" ./cmd/nagare/
   echo "    -> $OUTPUT_DIR/${APP}.exe"
 }
