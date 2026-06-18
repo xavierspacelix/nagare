@@ -11,7 +11,8 @@ Usage: $0 <target>
 Targets:
   linux            Build for Linux (stub — no camera/tracking)
   linux-native     Build for Linux with OpenCV (requires gocv)
-  windows          Build for Windows 11 (requires MinGW-w64)
+  windows          Build for Windows 11 (cross-compile from Linux, requires MinGW-w64)
+  windows-msys2    Build for Windows 11 natively in MSYS2 (requires OpenCV + Go in MSYS2)
   macos            Build for macOS (requires Xcode)
   all              Build all targets
   test             Run stub tests
@@ -45,14 +46,24 @@ build_linux_native() {
 }
 
 build_windows() {
-  echo "==> Building for Windows 11..."
+  echo "==> Building for Windows 11 (cross-compile from Linux)..."
   echo "    NOTE: Requires MinGW-w64 (x86_64-w64-mingw32-gcc)"
-  echo "    Install: sudo apt install gcc-mingw-w64-x86-64"
+  echo "    Install: sudo apt install gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64"
   ensure_output
   GOOS=windows GOARCH=amd64 \
   CGO_ENABLED=1 \
   CC=x86_64-w64-mingw32-gcc \
   go build -tags '!stub' -o "$OUTPUT_DIR/${APP}.exe" ./cmd/nagare/
+  echo "    -> $OUTPUT_DIR/${APP}.exe"
+}
+
+build_windows_msys2() {
+  echo "==> Building for Windows 11 (native MSYS2 MinGW)..."
+  echo "    NOTE: Requires MSYS2 with mingw-w64-<env>-opencv installed"
+  echo "    Also requires Go on PATH (system or MSYS2)"
+  echo "    Ensure PKG_CONFIG_PATH points to mingw pkgconfig"
+  ensure_output
+  CC=gcc CGO_ENABLED=1 go build -tags '!stub' -o "$OUTPUT_DIR/${APP}.exe" ./cmd/nagare/
   echo "    -> $OUTPUT_DIR/${APP}.exe"
 }
 
@@ -88,6 +99,7 @@ case "${1:-help}" in
   linux)        build_linux ;;
   linux-native) build_linux_native ;;
   windows)      build_windows ;;
+  windows-msys2) build_windows_msys2 ;;
   macos)        build_macos ;;
   all)
     build_linux
