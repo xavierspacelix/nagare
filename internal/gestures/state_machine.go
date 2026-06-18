@@ -10,16 +10,20 @@ import (
 type EventHandler func(event models.GestureEvent)
 
 type Config struct {
-	OpenPalmThreshold time.Duration
-	PinchThreshold    time.Duration
-	StabilizerFrames  int
+	OpenPalmThreshold    time.Duration
+	PinchThreshold       time.Duration
+	StabilizerFrames     int
+	DefaultMinConfidence float64
+	GestureMinConfidence map[models.Gesture]float64
 }
 
 func DefaultConfig() Config {
 	return Config{
-		OpenPalmThreshold: 300 * time.Millisecond,
-		PinchThreshold:    100 * time.Millisecond,
-		StabilizerFrames:  3,
+		OpenPalmThreshold:    300 * time.Millisecond,
+		PinchThreshold:       100 * time.Millisecond,
+		StabilizerFrames:     3,
+		DefaultMinConfidence: 0.5,
+		GestureMinConfidence: nil,
 	}
 }
 
@@ -94,17 +98,37 @@ func (m *Machine) Process(data *models.HandData) {
 	m.processGesture(now, data, models.GestureScrollDown, m.reco.IsScrollDown)
 }
 
+func (m *Machine) confidenceFor(gesture models.Gesture) float64 {
+	if m.config.GestureMinConfidence != nil {
+		if c, ok := m.config.GestureMinConfidence[gesture]; ok {
+			return c
+		}
+	}
+	return m.config.DefaultMinConfidence
+}
+
 func (m *Machine) processGesture(now time.Time, data *models.HandData, gesture models.Gesture, check func(*models.HandData) bool) {
 	state := m.states[gesture]
+
+	if data == nil || data.Confidence < m.confidenceFor(gesture) {
+		if state.current != models.GestureIdle {
+			state.current = models.GestureEnd
+			state.since = now
+			m.stab.Reset(gesture)
+			m.stab.Record(gesture, false)
+			m.emit(gesture, models.GestureEnd, data)
+		}
+		return
+	}
+
 	raw := check(data)
 	stable := m.stab.Record(gesture, raw)
 
-	if !m.cm.IsReady(gesture) && state.current != models.GestureIdle {
-		state.current = models.GestureIdle
-	}
-
 	switch state.current {
 	case models.GestureIdle:
+		if !m.cm.IsReady(gesture) {
+			return
+		}
 		if stable {
 			state.current = models.GestureStart
 			state.since = now
@@ -139,6 +163,7 @@ func (m *Machine) processGesture(now time.Time, data *models.HandData, gesture m
 		if !stable {
 			state.current = models.GestureEnd
 			state.since = now
+			m.cm.Start(gesture)
 			m.emit(gesture, models.GestureEnd, data)
 
 			if gesture == models.GesturePinchHold {

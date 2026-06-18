@@ -360,6 +360,155 @@ func TestDefaultMapping_NotFound(t *testing.T) {
 	}
 }
 
+func TestConfidenceGate_BlocksLowConfidence(t *testing.T) {
+	events := []models.GestureEvent{}
+	m := NewMachine(DefaultConfig(), func(e models.GestureEvent) {
+		events = append(events, e)
+	}, nil)
+
+	data := newHandData(allExtended(), false)
+	data.Confidence = 0.3
+
+	stabilize(m, data)
+
+	for _, e := range events {
+		if e.Gesture == models.GestureOpenPalm {
+			t.Fatal("expected no open palm events with low confidence")
+		}
+	}
+}
+
+func TestConfidenceGate_InterruptsActiveOnLowConfidence(t *testing.T) {
+	events := []models.GestureEvent{}
+	m := NewMachine(DefaultConfig(), func(e models.GestureEvent) {
+		events = append(events, e)
+	}, nil)
+
+	now := time.Now()
+	m.clock = func() time.Time { return now }
+
+	data := newHandData(allExtended(), false)
+	stabilize(m, data)
+
+	m.clock = func() time.Time { return now.Add(400 * time.Millisecond) }
+	stabilize(m, data)
+
+	activeFound := false
+	for _, e := range events {
+		if e.Gesture == models.GestureOpenPalm && e.State == models.GestureActive {
+			activeFound = true
+		}
+	}
+	if !activeFound {
+		t.Fatal("expected active before confidence drop")
+	}
+
+	data.Confidence = 0.3
+	m.clock = func() time.Time { return now.Add(500 * time.Millisecond) }
+	stabilize(m, data)
+
+	endFound := false
+	for _, e := range events {
+		if e.Gesture == models.GestureOpenPalm && e.State == models.GestureEnd {
+			endFound = true
+		}
+	}
+	if !endFound {
+		t.Fatal("expected end event after confidence drop")
+	}
+}
+
+func TestConfidenceGate_PerGestureThreshold(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.GestureMinConfidence = map[models.Gesture]float64{
+		models.GesturePinch: 0.8,
+	}
+	events := []models.GestureEvent{}
+	m := NewMachine(cfg, func(e models.GestureEvent) {
+		events = append(events, e)
+	}, nil)
+
+	now := time.Now()
+	m.clock = func() time.Time { return now }
+
+	data := newHandData(allExtended(), true)
+	data.Confidence = 0.6
+
+	stabilize(m, data)
+	m.clock = func() time.Time { return now.Add(200 * time.Millisecond) }
+	stabilize(m, data)
+
+	for _, e := range events {
+		if e.Gesture == models.GesturePinch {
+			t.Fatal("expected no pinch with confidence below per-gesture threshold")
+		}
+	}
+}
+
+func TestDebounce_PreventsRapidRetrigger(t *testing.T) {
+	events := []models.GestureEvent{}
+	m := NewMachine(DefaultConfig(), func(e models.GestureEvent) {
+		events = append(events, e)
+	}, nil)
+
+	now := time.Now()
+	m.clock = func() time.Time { return now }
+
+	data := newHandData(indexMiddleExtended(), false)
+	closed := newHandData(allFolded(), false)
+
+	stabilize(m, data)
+	m.clock = func() time.Time { return now.Add(200 * time.Millisecond) }
+	stabilize(m, data)
+
+	m.clock = func() time.Time { return now.Add(300 * time.Millisecond) }
+	stabilize(m, closed)
+
+	m.clock = func() time.Time { return now.Add(400 * time.Millisecond) }
+	stabilize(m, data)
+
+	startCount := 0
+	for _, e := range events {
+		if e.Gesture == models.GestureTwoFingerUp && e.State == models.GestureStart {
+			startCount++
+		}
+	}
+	if startCount > 1 {
+		t.Fatalf("expected at most 1 start event due to cooldown, got %d", startCount)
+	}
+}
+
+func TestCooldown_DoesNotInterruptActive(t *testing.T) {
+	events := []models.GestureEvent{}
+	m := NewMachine(DefaultConfig(), func(e models.GestureEvent) {
+		events = append(events, e)
+	}, nil)
+
+	now := time.Now()
+	m.clock = func() time.Time { return now }
+
+	data := newHandData(allExtended(), false)
+	stabilize(m, data)
+	m.clock = func() time.Time { return now.Add(400 * time.Millisecond) }
+	stabilize(m, data)
+
+	m.clock = func() time.Time { return now.Add(500 * time.Millisecond) }
+	stabilize(m, data)
+
+	m.clock = func() time.Time { return now.Add(600 * time.Millisecond) }
+	stabilize(m, data)
+
+	activeCount := 0
+	for _, e := range events {
+		if e.Gesture == models.GestureOpenPalm && e.State == models.GestureActive {
+			activeCount++
+		}
+	}
+	if activeCount != 1 {
+		t.Fatalf("expected exactly 1 active event, got %d (cooldown should not interrupt active)", activeCount)
+	}
+}
+
 func TestMachine_EventHandler(t *testing.T) {
 	events := []models.GestureEvent{}
 	m := NewMachine(DefaultConfig(), func(e models.GestureEvent) {
