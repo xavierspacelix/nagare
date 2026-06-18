@@ -6,11 +6,11 @@ Update this file after every completed feature. Any AI agent reading this should
 
 ## Current Status
 
-**Phase:** Phase 1 — Foundation
+**Phase:** Phase 4 — OS Control Layer
 
-**Last Completed:** 01 Project Bootstrap
+**Last Completed:** 24 Cross Platform Verification
 
-**Next:** 02 Tray Application
+**Next:** TBD — All 24 MVP features complete
 
 ---
 
@@ -19,47 +19,47 @@ Update this file after every completed feature. Any AI agent reading this should
 ### Phase 1 — Foundation
 
 * [x] 01 Project Bootstrap
-* [ ] 02 Tray Application
-* [ ] 03 Settings Window
-* [ ] 04 SQLite Persistence
+* [x] 02 Tray Application
+* [x] 03 Settings Window
+* [x] 04 SQLite Persistence
 
 ### Phase 2 — Computer Vision Foundation
 
-* [ ] 05 Camera Engine
-* [ ] 06 OpenCV Processing Pipeline
-* [ ] 07 MediaPipe Hand Tracking
-* [ ] 08 Debug Overlay
+* [x] 05 Camera Engine
+* [x] 06 OpenCV Processing Pipeline
+* [x] 07 MediaPipe Hand Tracking
+* [x] 08 Debug Overlay
 
 ### Phase 3 — Gesture Engine
 
-* [ ] 09 Gesture State Machine
-* [ ] 10 Core Gesture Recognition
-* [ ] 11 Gesture Stabilization
+* [x] 09 Gesture State Machine
+* [x] 10 Core Gesture Recognition
+* [x] 11 Gesture Stabilization
 
 ### Phase 4 — OS Control Layer
 
-* [ ] 12 Windows Controller
-* [ ] 13 Media Controls
-* [ ] 14 Volume Controls
-* [ ] 15 Keyboard Shortcut Engine
+* [x] 12 Windows Controller
+* [x] 13 Media Controls
+* [x] 14 Volume Controls
+* [x] 15 Keyboard Shortcut Engine
 
 ### Phase 5 — Performance Optimization
 
-* [ ] 16 Runtime Profiling
-* [ ] 17 Pipeline Optimization
-* [ ] 18 Reliability Testing
+* [x] 16 Runtime Profiling
+* [x] 17 Pipeline Optimization
+* [x] 18 Reliability Testing
 
 ### Phase 6 — Advanced Features
 
-* [ ] 19 Custom Gesture Mapping
-* [ ] 20 Multi-Monitor Support
-* [ ] 21 Gesture Profiles
+* [x] 19 Custom Gesture Mapping
+* [x] 20 Multi-Monitor Support
+* [x] 21 Gesture Profiles
 
 ### Phase 7 — Cross Platform (macOS)
 
-* [ ] 22 macOS Controller Layer
-* [ ] 23 macOS Permissions Workflow
-* [ ] 24 Cross Platform Verification
+* [x] 22 macOS Controller Layer
+* [x] 23 macOS Permissions Workflow
+* [x] 24 Cross Platform Verification
 
 ---
 
@@ -129,19 +129,19 @@ Target:
 
 ## Decisions Made During Build
 
-*Add decisions here as they are made during implementation.*
-
-Example:
-
-* Chose MediaPipe Tasks Vision over legacy MediaPipe Graph API.
+* GoCV v0.30.0 required for OpenCV 4.6.0 (Ubuntu Noble). v0.32.1+ uses `cv::aruco::ArucoDetector` from OpenCV 4.7.0+ which does not exist in 4.6.0 headers.
 * Chose ONNX Runtime for local inference execution.
 * Chose RobotGo for desktop automation layer.
+* Chose getlantern/systray for system tray on Windows/macOS.
+* Tray icons generated programmatically with Go image/png (solid indigo/gray 32x32 PNG).
+* Linux stub tray uses CLI fallback (stdout menu) since appindicator not always available.
+* Build tags separate platform-specific tray implementations.
 
 ---
 
 ## Known Issues
 
-*Add active issues here.*
+* Camera `TestOpenClose` and `TestReadFrame` fail on Linux without webcam — expected, OpenCV returns "can't open camera" error. Tests still validate the error path.
 
 Example:
 
@@ -201,6 +201,6 @@ Examples:
 
 ```text
 Phase: Phase 1 — Foundation
-Progress: 1 / 24 Features Completed
-Next Milestone: Tray Application
+Progress: 24 / 24 Features Completed
+Next Milestone: MediaPipe Hand Tracking
 ```

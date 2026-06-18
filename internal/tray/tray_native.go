@@ -84,6 +84,9 @@ func (a *App) listen(items menuItems) {
 			a.handle(ActionStop)
 
 		case <-items.openSettings.ClickedCh:
+			if a.onOpenSettings != nil {
+				a.onOpenSettings()
+			}
 			a.handle(ActionSettings)
 
 		case <-items.restartEngine.ClickedCh:
@@ -104,4 +107,18 @@ func (a *App) listen(items menuItems) {
 
 func (a *App) handle(action Action) {
 	a.logger.Info("tray action", "action", action)
+	switch action {
+	case ActionStart:
+		if a.onStart != nil {
+			go a.onStart()
+		}
+	case ActionStop:
+		if a.onStop != nil {
+			go a.onStop()
+		}
+	case ActionRestart:
+		if a.onRestart != nil {
+			go a.onRestart()
+		}
+	}
 }
