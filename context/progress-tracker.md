@@ -8,9 +8,9 @@ Update this file after every completed feature. Any AI agent reading this should
 
 **Phase:** Phase 1 — Foundation
 
-**Last Completed:** 04 SQLite Persistence
+**Last Completed:** 05 Camera Engine
 
-**Next:** 05 Camera Engine
+**Next:** 06 OpenCV Processing Pipeline
 
 ---
 
@@ -25,7 +25,7 @@ Update this file after every completed feature. Any AI agent reading this should
 
 ### Phase 2 — Computer Vision Foundation
 
-* [ ] 05 Camera Engine
+* [x] 05 Camera Engine
 * [ ] 06 OpenCV Processing Pipeline
 * [ ] 07 MediaPipe Hand Tracking
 * [ ] 08 Debug Overlay
@@ -201,6 +201,6 @@ Examples:
 
 ```text
 Phase: Phase 1 — Foundation
-Progress: 4 / 24 Features Completed
-Next Milestone: Camera Engine
+Progress: 5 / 24 Features Completed
+Next Milestone: OpenCV Processing Pipeline
 ```
