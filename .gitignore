@@ -1,0 +1,8 @@
+bin/
+releases/
+*.exe
+*.test
+*.out
+*.db
+nagare.yaml
+/nagare

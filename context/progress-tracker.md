@@ -8,9 +8,9 @@ Update this file after every completed feature. Any AI agent reading this should
 
 **Phase:** Phase 1 — Foundation
 
-**Last Completed:** 01 Project Bootstrap
+**Last Completed:** 02 Tray Application
 
-**Next:** 02 Tray Application
+**Next:** 03 Settings Window
 
 ---
 
@@ -19,7 +19,7 @@ Update this file after every completed feature. Any AI agent reading this should
 ### Phase 1 — Foundation
 
 * [x] 01 Project Bootstrap
-* [ ] 02 Tray Application
+* [x] 02 Tray Application
 * [ ] 03 Settings Window
 * [ ] 04 SQLite Persistence
 
@@ -129,13 +129,13 @@ Target:
 
 ## Decisions Made During Build
 
-*Add decisions here as they are made during implementation.*
-
-Example:
-
 * Chose MediaPipe Tasks Vision over legacy MediaPipe Graph API.
 * Chose ONNX Runtime for local inference execution.
 * Chose RobotGo for desktop automation layer.
+* Chose getlantern/systray for system tray on Windows/macOS.
+* Tray icons generated programmatically with Go image/png (solid indigo/gray 32x32 PNG).
+* Linux stub tray uses CLI fallback (stdout menu) since appindicator not always available.
+* Build tags separate platform-specific tray implementations.
 
 ---
 
@@ -201,6 +201,6 @@ Examples:
 
 ```text
 Phase: Phase 1 — Foundation
-Progress: 1 / 24 Features Completed
-Next Milestone: Tray Application
+Progress: 2 / 24 Features Completed
+Next Milestone: Settings Window
 ```
