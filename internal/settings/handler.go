@@ -44,3 +44,32 @@ func (s *SettingsServer) handleCameras(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(MockCameras)
 }
+
+func (s *SettingsServer) handleMappings(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	switch r.Method {
+	case http.MethodGet:
+		mappings, err := s.service.GetMappingDTOs()
+		if err != nil {
+			http.Error(w, `{"error":"load mappings"}`, http.StatusInternalServerError)
+			return
+		}
+		json.NewEncoder(w).Encode(mappings)
+
+	case http.MethodPut:
+		var mappings []MappingDTO
+		if err := json.NewDecoder(r.Body).Decode(&mappings); err != nil {
+			http.Error(w, `{"error":"invalid body"}`, http.StatusBadRequest)
+			return
+		}
+		if err := s.service.SaveMappingDTOs(mappings); err != nil {
+			http.Error(w, `{"error":"save mappings"}`, http.StatusInternalServerError)
+			return
+		}
+		json.NewEncoder(w).Encode(mappings)
+
+	default:
+		http.Error(w, `{"error":"method not allowed"}`, http.StatusMethodNotAllowed)
+	}
+}

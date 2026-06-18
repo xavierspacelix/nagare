@@ -52,3 +52,60 @@ func LookupMapping(gesture models.Gesture, state models.GestureState) (Action, b
 	}
 	return ActionNone, false
 }
+
+type MappingStore struct {
+	custom []Mapping
+}
+
+func NewMappingStore() *MappingStore {
+	return &MappingStore{}
+}
+
+func (ms *MappingStore) SetCustom(mappings []Mapping) {
+	ms.custom = mappings
+}
+
+func (ms *MappingStore) GetCustom() []Mapping {
+	if ms.custom == nil {
+		return nil
+	}
+	return ms.custom
+}
+
+func (ms *MappingStore) Lookup(gesture models.Gesture, state models.GestureState) (Action, bool) {
+	for _, m := range ms.custom {
+		if m.Gesture == gesture && m.OnState == state {
+			return m.Action, true
+		}
+	}
+	return LookupMapping(gesture, state)
+}
+
+func GestureFromName(name string) (models.Gesture, bool) {
+	for _, g := range allGestures() {
+		if string(g) == name {
+			return g, true
+		}
+	}
+	return "", false
+}
+
+func ActionFromName(name string) (Action, bool) {
+	for _, a := range AllActions() {
+		if string(a) == name {
+			return a, true
+		}
+	}
+	return ActionNone, false
+}
+
+func AllActions() []Action {
+	return []Action{
+		ActionTrackingOn, ActionTrackingOff,
+		ActionLeftClick, ActionRightClick,
+		ActionMouseDown, ActionMouseUp,
+		ActionScrollUp, ActionScrollDown,
+		ActionVolumeUp, ActionVolumeDown, ActionMute,
+		ActionMediaPlayPause, ActionMediaNext, ActionMediaPrev, ActionKeyTap,
+	}
+}

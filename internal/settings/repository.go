@@ -24,6 +24,7 @@ type GestureMapping struct {
 	ID          int
 	GestureName string
 	ActionName  string
+	OnState     string
 	Enabled     bool
 	CooldownMs  int
 }
@@ -73,6 +74,7 @@ func (r *Repository) migrate() error {
 			id           INTEGER PRIMARY KEY,
 			gesture_name TEXT NOT NULL,
 			action_name  TEXT NOT NULL,
+			on_state     TEXT NOT NULL DEFAULT 'active',
 			enabled      INTEGER NOT NULL DEFAULT 1,
 			cooldown_ms  INTEGER NOT NULL DEFAULT 200,
 			created_at   TEXT NOT NULL DEFAULT (datetime('now'))
@@ -99,6 +101,8 @@ func (r *Repository) migrate() error {
 		}
 	}
 
+	r.db.Exec(`ALTER TABLE gesture_mappings ADD COLUMN on_state TEXT NOT NULL DEFAULT 'active'`)
+
 	return r.seed()
 }
 
@@ -116,6 +120,42 @@ func (r *Repository) seed() error {
 		VALUES ('', 0.8, 0.5, 0, 'default')`)
 	if err != nil {
 		return fmt.Errorf("seed settings: %w", err)
+	}
+
+	var mappingCount int
+	err = r.db.QueryRow("SELECT COUNT(*) FROM gesture_mappings").Scan(&mappingCount)
+	if err != nil {
+		return err
+	}
+	if mappingCount > 0 {
+		return nil
+	}
+
+	defaults := []struct {
+		gesture string
+		action  string
+		state   string
+	}{
+		{"open_palm", "tracking_on", "active"},
+		{"closed_fist", "tracking_off", "active"},
+		{"pinch", "left_click", "active"},
+		{"pinch_hold", "mouse_down", "active"},
+		{"pinch_hold", "mouse_up", "end"},
+		{"two_finger_pinch", "right_click", "active"},
+		{"two_finger_up", "volume_up", "active"},
+		{"two_finger_down", "volume_down", "active"},
+		{"swipe_left", "media_prev", "active"},
+		{"swipe_right", "media_next", "active"},
+		{"scroll_up", "scroll_up", "active"},
+		{"scroll_down", "scroll_down", "active"},
+	}
+
+	for _, d := range defaults {
+		_, err = r.db.Exec(`INSERT INTO gesture_mappings (gesture_name, action_name, on_state, enabled, cooldown_ms)
+			VALUES (?, ?, ?, 1, 250)`, d.gesture, d.action, d.state)
+		if err != nil {
+			return fmt.Errorf("seed mapping %s: %w", d.gesture, err)
+		}
 	}
 
 	return nil
@@ -156,7 +196,7 @@ func (r *Repository) SaveSettings(s *Settings) error {
 }
 
 func (r *Repository) GetGestureMappings() ([]GestureMapping, error) {
-	rows, err := r.db.Query(`SELECT id, gesture_name, action_name, enabled, cooldown_ms
+	rows, err := r.db.Query(`SELECT id, gesture_name, action_name, on_state, enabled, cooldown_ms
 		FROM gesture_mappings ORDER BY id`)
 	if err != nil {
 		return nil, fmt.Errorf("get gesture mappings: %w", err)
@@ -166,7 +206,7 @@ func (r *Repository) GetGestureMappings() ([]GestureMapping, error) {
 	var mappings []GestureMapping
 	for rows.Next() {
 		var m GestureMapping
-		if err := rows.Scan(&m.ID, &m.GestureName, &m.ActionName, &m.Enabled, &m.CooldownMs); err != nil {
+		if err := rows.Scan(&m.ID, &m.GestureName, &m.ActionName, &m.OnState, &m.Enabled, &m.CooldownMs); err != nil {
 			return nil, fmt.Errorf("scan mapping: %w", err)
 		}
 		mappings = append(mappings, m)
@@ -176,9 +216,9 @@ func (r *Repository) GetGestureMappings() ([]GestureMapping, error) {
 
 func (r *Repository) SaveGestureMapping(m *GestureMapping) error {
 	_, err := r.db.Exec(`UPDATE gesture_mappings SET
-		gesture_name = ?, action_name = ?, enabled = ?, cooldown_ms = ?
+		gesture_name = ?, action_name = ?, on_state = ?, enabled = ?, cooldown_ms = ?
 		WHERE id = ?`,
-		m.GestureName, m.ActionName, m.Enabled, m.CooldownMs, m.ID,
+		m.GestureName, m.ActionName, m.OnState, m.Enabled, m.CooldownMs, m.ID,
 	)
 	if err != nil {
 		return fmt.Errorf("save gesture mapping: %w", err)

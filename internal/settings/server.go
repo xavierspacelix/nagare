@@ -76,6 +76,7 @@ func (s *SettingsServer) registerRoutes() {
 	s.mux.HandleFunc("/", s.handleUI)
 	s.mux.HandleFunc("/api/settings", s.handleSettings)
 	s.mux.HandleFunc("/api/cameras", s.handleCameras)
+	s.mux.HandleFunc("/api/mappings", s.handleMappings)
 }
 
 func findFreePort() (int, error) {

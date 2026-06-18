@@ -52,6 +52,51 @@ func (s *Service) SaveAppSettings(as *AppSettings) error {
 	})
 }
 
+type MappingDTO struct {
+	ID          int    `json:"id"`
+	GestureName string `json:"gesture_name"`
+	ActionName  string `json:"action_name"`
+	OnState     string `json:"on_state"`
+	Enabled     bool   `json:"enabled"`
+	CooldownMs  int    `json:"cooldown_ms"`
+}
+
+func (s *Service) GetMappingDTOs() ([]MappingDTO, error) {
+	mappings, err := s.repo.GetGestureMappings()
+	if err != nil {
+		return nil, err
+	}
+	dtos := make([]MappingDTO, len(mappings))
+	for i, m := range mappings {
+		dtos[i] = MappingDTO{
+			ID:          m.ID,
+			GestureName: m.GestureName,
+			ActionName:  m.ActionName,
+			OnState:     m.OnState,
+			Enabled:     m.Enabled,
+			CooldownMs:  m.CooldownMs,
+		}
+	}
+	return dtos, nil
+}
+
+func (s *Service) SaveMappingDTOs(dtos []MappingDTO) error {
+	for _, dto := range dtos {
+		m := &GestureMapping{
+			ID:          dto.ID,
+			GestureName: dto.GestureName,
+			ActionName:  dto.ActionName,
+			OnState:     dto.OnState,
+			Enabled:     dto.Enabled,
+			CooldownMs:  dto.CooldownMs,
+		}
+		if err := s.repo.SaveGestureMapping(m); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func defaultAppSettings() *AppSettings {
 	return &AppSettings{
 		StartupEnabled: false,

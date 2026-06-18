@@ -6,6 +6,8 @@ import (
 	"runtime"
 	"time"
 
+	"nagare/models"
+
 	"nagare/internal/actions"
 	"nagare/internal/camera"
 	"nagare/internal/config"
@@ -58,6 +60,29 @@ func main() {
 	ctrl := controller.New()
 	eng := actions.NewEngine(ctrl, logger)
 	prof := profiler.New()
+
+	mappingStore := gestures.NewMappingStore()
+	if repoMappings, err := repo.GetGestureMappings(); err == nil {
+		custom := make([]gestures.Mapping, 0, len(repoMappings))
+		for _, rm := range repoMappings {
+			g, ok := gestures.GestureFromName(rm.GestureName)
+			if !ok {
+				continue
+			}
+			a, ok := gestures.ActionFromName(rm.ActionName)
+			if !ok {
+				continue
+			}
+			state := models.GestureActive
+			if rm.OnState == "end" {
+				state = models.GestureEnd
+			}
+			custom = append(custom, gestures.Mapping{Gesture: g, Action: a, OnState: state})
+		}
+		mappingStore.SetCustom(custom)
+	}
+	eng.SetMappings(mappingStore)
+
 	machineCfg := gestures.DefaultConfig()
 	machine := gestures.NewMachine(machineCfg, eng.Handle, logger)
 

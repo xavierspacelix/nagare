@@ -209,10 +209,13 @@ input[type="range"]::-webkit-slider-thumb {
 
 <script>
 let settings = {};
+let mappings = [];
 
 async function loadSettings() {
   const res = await fetch('/api/settings');
   settings = await res.json();
+  const mr = await fetch('/api/mappings');
+  mappings = await mr.json();
   render();
 }
 
@@ -224,6 +227,12 @@ async function saveSettings() {
   });
   if (res.ok) {
     settings = await res.json();
+    const mr = await fetch('/api/mappings', {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(mappings),
+    });
+    if (mr.ok) mappings = await mr.json();
     document.getElementById('footerStatus').textContent = 'Settings saved';
     setTimeout(() => {
       document.getElementById('footerStatus').textContent = 'Settings loaded';
@@ -280,11 +289,36 @@ function bindEvents() {
       }
     });
   });
+  document.querySelectorAll('[data-map-toggle]').forEach(el => {
+    el.addEventListener('click', () => {
+      const i = parseInt(el.dataset.mapToggle);
+      mappings[i].enabled = !mappings[i].enabled;
+      el.classList.toggle('active', mappings[i].enabled);
+    });
+  });
+  document.querySelectorAll('[data-map-action]').forEach(el => {
+    el.addEventListener('change', () => {
+      const i = parseInt(el.dataset.mapAction);
+      mappings[i].action_name = el.value;
+    });
+  });
 }
 
 function sectionsHTML() {
-  return generalSection() + cameraSection() + gesturesSection() + systemSection();
+  return generalSection() + cameraSection() + gesturesSection() + mappingsSection() + systemSection();
 }
+
+const gestureNames = [
+  'open_palm','closed_fist','pinch','pinch_hold',
+  'two_finger_pinch','two_finger_up','two_finger_down',
+  'swipe_left','swipe_right','scroll_up','scroll_down'
+];
+const actionNames = [
+  'tracking_on','tracking_off','left_click','right_click',
+  'mouse_down','mouse_up','scroll_up','scroll_down',
+  'volume_up','volume_down','mute',
+  'media_play_pause','media_next','media_prev','key_tap'
+];
 
 function toggleHTML(key, value) {
   return '<div class="toggle' + (value ? ' active' : '') + '" data-toggle="' + key + '"><div class="toggle-knob"></div></div>';
@@ -329,6 +363,42 @@ function gesturesSection() {
 
 function field(label, desc, control) {
   return '<div class="field"><div><div class="field-label">' + label + '</div><div class="field-desc">' + desc + '</div></div><div class="field-control">' + control + '</div></div>';
+}
+
+function labelForGesture(name) {
+  return name.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+function labelForAction(name) {
+  return name.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
+function mappingsSection() {
+  const rows = mappings.map((m, i) =>
+    '<tr>' +
+      '<td style="padding:6px 8px;border-bottom:1px solid var(--color-border);font-size:13px;">' + labelForGesture(m.gesture_name) + '</td>' +
+      '<td style="padding:6px 8px;border-bottom:1px solid var(--color-border);">' +
+        '<select data-map-action="' + i + '" style="min-width:140px;padding:4px 8px;font-size:12px;">' +
+          actionNames.map(a => '<option value="' + a + '"' + (m.action_name === a ? ' selected' : '') + '>' + labelForAction(a) + '</option>').join('') +
+        '</select>' +
+      '</td>' +
+      '<td style="padding:6px 8px;border-bottom:1px solid var(--color-border);text-align:center;">' +
+        '<div class="toggle' + (m.enabled ? ' active' : '') + '" data-map-toggle="' + i + '" style="display:inline-block;"><div class="toggle-knob"></div></div>' +
+      '</td>' +
+    '</tr>'
+  ).join('');
+
+  return '<div class="card">' +
+    '<div class="card-title">Gesture Mappings</div>' +
+    '<div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:var(--space-4);">Assign actions to each gesture</div>' +
+    '<table style="width:100%;border-collapse:collapse;">' +
+      '<thead><tr>' +
+        '<th style="text-align:left;padding:6px 8px;font-size:12px;color:var(--color-text-muted);font-weight:500;">Gesture</th>' +
+        '<th style="text-align:left;padding:6px 8px;font-size:12px;color:var(--color-text-muted);font-weight:500;">Action</th>' +
+        '<th style="text-align:center;padding:6px 8px;font-size:12px;color:var(--color-text-muted);font-weight:500;">Enabled</th>' +
+      '</tr></thead>' +
+      '<tbody>' + rows + '</tbody>' +
+    '</table>' +
+  '</div>';
 }
 
 function systemSection() {

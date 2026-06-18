@@ -9,9 +9,10 @@ import (
 )
 
 type Engine struct {
-	ctrl   controller.OSController
-	logger *slog.Logger
+	ctrl     controller.OSController
+	logger   *slog.Logger
 	tracking bool
+	mappings *gestures.MappingStore
 }
 
 func NewEngine(ctrl controller.OSController, logger *slog.Logger) *Engine {
@@ -19,9 +20,14 @@ func NewEngine(ctrl controller.OSController, logger *slog.Logger) *Engine {
 		logger = slog.Default()
 	}
 	return &Engine{
-		ctrl:   ctrl,
-		logger: logger,
+		ctrl:     ctrl,
+		logger:   logger,
+		mappings: gestures.NewMappingStore(),
 	}
+}
+
+func (e *Engine) SetMappings(ms *gestures.MappingStore) {
+	e.mappings = ms
 }
 
 func (e *Engine) Handle(event models.GestureEvent) {
@@ -29,7 +35,7 @@ func (e *Engine) Handle(event models.GestureEvent) {
 		return
 	}
 
-	action, ok := gestures.LookupMapping(event.Gesture, event.State)
+	action, ok := e.mappings.Lookup(event.Gesture, event.State)
 	if !ok {
 		return
 	}
