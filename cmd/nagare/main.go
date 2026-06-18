@@ -58,6 +58,8 @@ func main() {
 		ov = nil
 	}
 
+	checkPermissions(logger)
+
 	ctrl := controller.New()
 	eng := actions.NewEngine(ctrl, logger)
 	prof := profiler.New()
