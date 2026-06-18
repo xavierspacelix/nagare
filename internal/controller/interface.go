@@ -13,4 +13,5 @@ type OSController interface {
 	MediaPlayPause() error
 	MediaNext() error
 	MediaPrevious() error
+	KeyTap(key string, modifiers ...string) error
 }

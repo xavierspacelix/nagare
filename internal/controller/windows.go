@@ -67,3 +67,14 @@ func (w *WindowsController) MediaPrevious() error {
 	robotgo.KeyTap("audio_prev")
 	return nil
 }
+
+func (w *WindowsController) KeyTap(key string, modifiers ...string) error {
+	if len(modifiers) > 0 {
+		args := make([]interface{}, len(modifiers))
+		for i, m := range modifiers {
+			args[i] = m
+		}
+		return robotgo.KeyTap(key, args...)
+	}
+	return robotgo.KeyTap(key)
+}

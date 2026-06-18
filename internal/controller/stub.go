@@ -1,10 +1,12 @@
 package controller
 
 type StubController struct {
-	LastAction string
-	LastX      int
-	LastY      int
-	LastTicks  int
+	LastAction    string
+	LastX         int
+	LastY         int
+	LastTicks     int
+	LastKey       string
+	LastModifiers []string
 }
 
 func NewStubController() *StubController {
@@ -71,5 +73,12 @@ func (s *StubController) MediaNext() error {
 
 func (s *StubController) MediaPrevious() error {
 	s.LastAction = "media_prev"
+	return nil
+}
+
+func (s *StubController) KeyTap(key string, modifiers ...string) error {
+	s.LastAction = "key_tap"
+	s.LastKey = key
+	s.LastModifiers = modifiers
 	return nil
 }
