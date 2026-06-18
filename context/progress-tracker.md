@@ -1,0 +1,206 @@
+# Progress Tracker
+
+Update this file after every completed feature. Any AI agent reading this should immediately know what is done, what is in progress, and what is next.
+
+---
+
+## Current Status
+
+**Phase:** Phase 1 — Foundation
+
+**Last Completed:** 01 Project Bootstrap
+
+**Next:** 02 Tray Application
+
+---
+
+## Progress
+
+### Phase 1 — Foundation
+
+* [x] 01 Project Bootstrap
+* [ ] 02 Tray Application
+* [ ] 03 Settings Window
+* [ ] 04 SQLite Persistence
+
+### Phase 2 — Computer Vision Foundation
+
+* [ ] 05 Camera Engine
+* [ ] 06 OpenCV Processing Pipeline
+* [ ] 07 MediaPipe Hand Tracking
+* [ ] 08 Debug Overlay
+
+### Phase 3 — Gesture Engine
+
+* [ ] 09 Gesture State Machine
+* [ ] 10 Core Gesture Recognition
+* [ ] 11 Gesture Stabilization
+
+### Phase 4 — OS Control Layer
+
+* [ ] 12 Windows Controller
+* [ ] 13 Media Controls
+* [ ] 14 Volume Controls
+* [ ] 15 Keyboard Shortcut Engine
+
+### Phase 5 — Performance Optimization
+
+* [ ] 16 Runtime Profiling
+* [ ] 17 Pipeline Optimization
+* [ ] 18 Reliability Testing
+
+### Phase 6 — Advanced Features
+
+* [ ] 19 Custom Gesture Mapping
+* [ ] 20 Multi-Monitor Support
+* [ ] 21 Gesture Profiles
+
+### Phase 7 — Cross Platform (macOS)
+
+* [ ] 22 macOS Controller Layer
+* [ ] 23 macOS Permissions Workflow
+* [ ] 24 Cross Platform Verification
+
+---
+
+## Current MVP Scope
+
+### Included in MVP
+
+* Camera access
+* Webcam processing
+* Hand landmark detection
+* Gesture recognition
+* Cursor movement
+* Left click
+* Right click
+* Drag and drop
+* Scroll
+* Volume control
+* Media control
+* Tray application
+* Settings persistence
+* Auto start
+* Local-only processing
+
+### Excluded From MVP
+
+* User-trained gestures
+* Plugin ecosystem
+* Cloud synchronization
+* AI-assisted gesture creation
+
+---
+
+## Performance Targets
+
+| Metric          | Target         |
+| --------------- | -------------- |
+| Startup Time    | < 2 seconds    |
+| Memory Usage    | < 150 MB       |
+| Idle CPU Usage  | < 10%          |
+| FPS             | ≥ 24 FPS       |
+| Gesture Latency | Near real-time |
+
+---
+
+## Platform Status
+
+### Windows 11
+
+Status: Not Started
+
+Target:
+
+* Full feature support
+* Production release platform
+
+### macOS
+
+Status: Not Started
+
+Target:
+
+* Feature parity with Windows
+* Implemented after Windows MVP reaches production quality
+* Remains part of the same project roadmap
+
+---
+
+## Decisions Made During Build
+
+*Add decisions here as they are made during implementation.*
+
+Example:
+
+* Chose MediaPipe Tasks Vision over legacy MediaPipe Graph API.
+* Chose ONNX Runtime for local inference execution.
+* Chose RobotGo for desktop automation layer.
+
+---
+
+## Known Issues
+
+*Add active issues here.*
+
+Example:
+
+* Camera initialization instability on specific USB webcams.
+* Performance degradation on low-light environments.
+
+---
+
+## Notes
+
+*Add notes here as the build progresses.*
+
+Examples:
+
+* Keep all webcam processing local.
+* Never persist webcam frames.
+* Maintain platform abstraction between Windows and macOS controllers.
+* All gestures must pass through Gesture Engine state validation before OS actions are executed.
+
+---
+
+## Release Readiness Checklist
+
+### MVP Release
+
+* [ ] Stable webcam acquisition
+* [ ] Stable hand tracking
+* [ ] Stable cursor control
+* [ ] Stable click recognition
+* [ ] Stable scroll recognition
+* [ ] Stable volume control
+* [ ] Tray application completed
+* [ ] SQLite persistence completed
+* [ ] Performance targets achieved
+* [ ] Documentation updated
+
+### Production Release
+
+* [ ] Windows QA completed
+* [ ] 8-hour stability test passed
+* [ ] Memory leak testing passed
+* [ ] CPU usage within target
+* [ ] Crash recovery tested
+* [ ] Installer package created
+* [ ] Versioning process documented
+
+### Cross Platform Release
+
+* [ ] macOS controller completed
+* [ ] macOS permission flow completed
+* [ ] Feature parity validated
+* [ ] Cross-platform QA completed
+
+---
+
+## Last Updated
+
+```text
+Phase: Phase 1 — Foundation
+Progress: 1 / 24 Features Completed
+Next Milestone: Tray Application
+```
