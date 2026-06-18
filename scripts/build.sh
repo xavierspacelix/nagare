@@ -65,13 +65,16 @@ build_windows_msys2() {
   echo "      export PKG_CONFIG_PATH=/ucrt64/lib/pkgconfig"
   ensure_output
 
-  CGOFLAGS="$(pkg-config --cflags opencv4 2>/dev/null || true)"
-  CGOLIBS="$(pkg-config --libs opencv4 2>/dev/null || true)"
-
-  if [ -z "$CGOFLAGS" ]; then
-    echo "    WARNING: pkg-config didn't find opencv4, trying /ucrt64/include/opencv4"
+  if command -v pkg-config &>/dev/null && pkg-config --exists opencv4 2>/dev/null; then
+    CGOFLAGS="$(pkg-config --cflags opencv4)"
+    CGOLIBS="$(pkg-config --libs opencv4)"
+  elif [ -d /ucrt64/include/opencv4 ]; then
+    echo "    WARNING: pkg-config not found; using /ucrt64 paths directly"
     CGOFLAGS="-I/ucrt64/include/opencv4"
-    CGOLIBS="-lopencv_world460"
+    CGOLIBS="$(ls /ucrt64/lib/libopencv_*.dll.a | sed 's/.*libopencv_\(.*\)\.dll\.a/-lopencv_\1/g' | tr '\n' ' ')"
+  else
+    echo "    ERROR: OpenCV not found. Install with: pacman -S mingw-w64-ucrt-x86_64-opencv"
+    exit 1
   fi
 
   CGO_CFLAGS="$CGOFLAGS" \
