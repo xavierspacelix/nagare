@@ -16,6 +16,7 @@ const (
 	ActionScrollDown    Action = "scroll_down"
 	ActionVolumeUp      Action = "volume_up"
 	ActionVolumeDown    Action = "volume_down"
+	ActionMute          Action = "mute"
 	ActionMediaPlayPause Action = "media_play_pause"
 	ActionMediaNext     Action = "media_next"
 	ActionMediaPrev     Action = "media_prev"

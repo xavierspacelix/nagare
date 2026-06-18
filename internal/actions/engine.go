@@ -67,6 +67,8 @@ func (e *Engine) Handle(event models.GestureEvent) {
 		err = e.ctrl.VolumeUp()
 	case gestures.ActionVolumeDown:
 		err = e.ctrl.VolumeDown()
+	case gestures.ActionMute:
+		err = e.ctrl.Mute()
 	case gestures.ActionMediaPlayPause:
 		err = e.ctrl.MediaPlayPause()
 	case gestures.ActionMediaNext:

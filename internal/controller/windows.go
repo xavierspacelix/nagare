@@ -48,6 +48,11 @@ func (w *WindowsController) VolumeDown() error {
 	return nil
 }
 
+func (w *WindowsController) Mute() error {
+	robotgo.KeyTap("audio_mute")
+	return nil
+}
+
 func (w *WindowsController) MediaPlayPause() error {
 	robotgo.KeyTap("audio_play")
 	return nil

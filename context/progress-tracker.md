@@ -8,9 +8,9 @@ Update this file after every completed feature. Any AI agent reading this should
 
 **Phase:** Phase 4 — OS Control Layer
 
-**Last Completed:** 12 Windows Controller
+**Last Completed:** 14 Volume Controls
 
-**Next:** 13 Media Controls
+**Next:** 15 Keyboard Shortcut Engine
 
 ---
 
@@ -39,8 +39,8 @@ Update this file after every completed feature. Any AI agent reading this should
 ### Phase 4 — OS Control Layer
 
 * [x] 12 Windows Controller
-* [ ] 13 Media Controls
-* [ ] 14 Volume Controls
+* [x] 13 Media Controls
+* [x] 14 Volume Controls
 * [ ] 15 Keyboard Shortcut Engine
 
 ### Phase 5 — Performance Optimization
@@ -201,6 +201,6 @@ Examples:
 
 ```text
 Phase: Phase 1 — Foundation
-Progress: 12 / 24 Features Completed
+Progress: 14 / 24 Features Completed
 Next Milestone: MediaPipe Hand Tracking
 ```

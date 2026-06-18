@@ -54,6 +54,11 @@ func (s *StubController) VolumeDown() error {
 	return nil
 }
 
+func (s *StubController) Mute() error {
+	s.LastAction = "mute"
+	return nil
+}
+
 func (s *StubController) MediaPlayPause() error {
 	s.LastAction = "media_play_pause"
 	return nil

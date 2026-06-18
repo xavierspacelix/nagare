@@ -9,6 +9,7 @@ type OSController interface {
 	Scroll(ticks int) error
 	VolumeUp() error
 	VolumeDown() error
+	Mute() error
 	MediaPlayPause() error
 	MediaNext() error
 	MediaPrevious() error
