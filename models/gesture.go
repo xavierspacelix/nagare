@@ -3,17 +3,17 @@ package models
 type Gesture string
 
 const (
-	GestureOpenPalm   Gesture = "open_palm"
-	GestureClosedFist Gesture = "closed_fist"
-	GesturePinch      Gesture = "pinch"
-	GesturePinchHold  Gesture = "pinch_hold"
+	GestureOpenPalm       Gesture = "open_palm"
+	GestureClosedFist     Gesture = "closed_fist"
+	GesturePinch          Gesture = "pinch"
+	GesturePinchHold      Gesture = "pinch_hold"
 	GestureTwoFingerPinch Gesture = "two_finger_pinch"
 	GestureTwoFingerUp    Gesture = "two_fingers_up"
 	GestureTwoFingerDown  Gesture = "two_fingers_down"
-	GestureSwipeLeft  Gesture = "swipe_left"
-	GestureSwipeRight Gesture = "swipe_right"
-	GestureScrollUp   Gesture = "scroll_up"
-	GestureScrollDown Gesture = "scroll_down"
+	GestureSwipeLeft      Gesture = "swipe_left"
+	GestureSwipeRight     Gesture = "swipe_right"
+	GestureScrollUp       Gesture = "scroll_up"
+	GestureScrollDown     Gesture = "scroll_down"
 )
 
 type GestureState int

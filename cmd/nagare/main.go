@@ -99,9 +99,16 @@ func main() {
 	loadMappings(profileID)
 
 	machineCfg := gestures.DefaultConfig()
-	machine := gestures.NewMachine(machineCfg, eng.Handle, logger)
+	machine := gestures.NewMachine(machineCfg, eng.HandleGesture, logger)
 
-	dm := display.NewMapper(display.NewDiscoverer())
+	monitors, err := ctrl.GetMonitors()
+	if err != nil {
+		logger.Warn("failed to get monitors", "error", err)
+	}
+	dm, err := display.NewMapper(monitors)
+	if err != nil {
+		logger.Warn("failed to create display mapper", "error", err)
+	}
 	pipe := pipeline.NewRunner(cm, pl, lm, ov, machine, eng, ctrl, prof, dm, logger)
 
 	app := tray.New(logger)

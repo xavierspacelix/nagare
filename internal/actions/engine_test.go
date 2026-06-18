@@ -19,7 +19,7 @@ func TestEngine_LeftClickOnPinch(t *testing.T) {
 		Confidence: 0.9,
 	}
 
-	e.Handle(event)
+	e.HandleGesture(event)
 
 	if stub.LastAction != "left_click" {
 		t.Fatalf("expected left_click, got %s", stub.LastAction)
@@ -31,7 +31,7 @@ func TestEngine_RightClickOnTwoFingerPinch(t *testing.T) {
 	e := NewEngine(stub, nil)
 	e.SetTracking(true)
 
-	e.Handle(models.GestureEvent{
+	e.HandleGesture(models.GestureEvent{
 		Gesture: models.GestureTwoFingerPinch,
 		State:   models.GestureActive,
 	})
@@ -46,7 +46,7 @@ func TestEngine_MouseDownOnPinchHold(t *testing.T) {
 	e := NewEngine(stub, nil)
 	e.SetTracking(true)
 
-	e.Handle(models.GestureEvent{
+	e.HandleGesture(models.GestureEvent{
 		Gesture: models.GesturePinchHold,
 		State:   models.GestureActive,
 	})
@@ -61,7 +61,7 @@ func TestEngine_MouseUpOnPinchHoldEnd(t *testing.T) {
 	e := NewEngine(stub, nil)
 	e.SetTracking(true)
 
-	e.Handle(models.GestureEvent{
+	e.HandleGesture(models.GestureEvent{
 		Gesture: models.GesturePinchHold,
 		State:   models.GestureEnd,
 	})
@@ -76,7 +76,7 @@ func TestEngine_VolumeUp(t *testing.T) {
 	e := NewEngine(stub, nil)
 	e.SetTracking(true)
 
-	e.Handle(models.GestureEvent{
+	e.HandleGesture(models.GestureEvent{
 		Gesture: models.GestureTwoFingerUp,
 		State:   models.GestureActive,
 	})
@@ -91,7 +91,7 @@ func TestEngine_VolumeDown(t *testing.T) {
 	e := NewEngine(stub, nil)
 	e.SetTracking(true)
 
-	e.Handle(models.GestureEvent{
+	e.HandleGesture(models.GestureEvent{
 		Gesture: models.GestureTwoFingerDown,
 		State:   models.GestureActive,
 	})
@@ -106,7 +106,7 @@ func TestEngine_MediaPlayPause(t *testing.T) {
 	e := NewEngine(stub, nil)
 	e.SetTracking(true)
 
-	e.Handle(models.GestureEvent{
+	e.HandleGesture(models.GestureEvent{
 		Gesture: models.GestureOpenPalm,
 		State:   models.GestureActive,
 	})
@@ -124,7 +124,7 @@ func TestEngine_TrackingOnOff(t *testing.T) {
 		t.Fatal("expected tracking off initially")
 	}
 
-	e.Handle(models.GestureEvent{
+	e.HandleGesture(models.GestureEvent{
 		Gesture: models.GestureOpenPalm,
 		State:   models.GestureActive,
 	})
@@ -133,7 +133,7 @@ func TestEngine_TrackingOnOff(t *testing.T) {
 		t.Fatal("expected tracking on after open palm")
 	}
 
-	e.Handle(models.GestureEvent{
+	e.HandleGesture(models.GestureEvent{
 		Gesture: models.GestureClosedFist,
 		State:   models.GestureActive,
 	})
@@ -147,7 +147,7 @@ func TestEngine_BlocksActionsWhenNotTracking(t *testing.T) {
 	stub := controller.NewStubController()
 	e := NewEngine(stub, nil)
 
-	e.Handle(models.GestureEvent{
+	e.HandleGesture(models.GestureEvent{
 		Gesture: models.GesturePinch,
 		State:   models.GestureActive,
 	})
@@ -166,7 +166,7 @@ func TestEngine_UnknownGesture(t *testing.T) {
 	if ok {
 		t.Logf("start mapping: %s", action)
 	}
-	e.Handle(models.GestureEvent{
+	e.HandleGesture(models.GestureEvent{
 		Gesture: models.GesturePinch,
 		State:   models.GestureStart,
 	})
@@ -181,7 +181,7 @@ func TestEngine_MediaNextPrev(t *testing.T) {
 	e := NewEngine(stub, nil)
 	e.SetTracking(true)
 
-	e.Handle(models.GestureEvent{
+	e.HandleGesture(models.GestureEvent{
 		Gesture: models.GestureSwipeLeft,
 		State:   models.GestureActive,
 	})
@@ -189,7 +189,7 @@ func TestEngine_MediaNextPrev(t *testing.T) {
 		t.Fatalf("expected media_prev, got %s", stub.LastAction)
 	}
 
-	e.Handle(models.GestureEvent{
+	e.HandleGesture(models.GestureEvent{
 		Gesture: models.GestureSwipeRight,
 		State:   models.GestureActive,
 	})

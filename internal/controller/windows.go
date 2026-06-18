@@ -4,6 +4,7 @@ package controller
 
 import (
 	"github.com/go-vgo/robotgo"
+	"nagare/internal/display"
 )
 
 func New() OSController {
@@ -77,4 +78,31 @@ func (w *WindowsController) KeyTap(key string, modifiers ...string) error {
 		return robotgo.KeyTap(key, args...)
 	}
 	return robotgo.KeyTap(key)
+}
+
+func (wc *WindowsController) GetMonitors() ([]display.Info, error) {
+	num := robotgo.DisplaysNum()
+	monitors := make([]display.Info, 0, num)
+
+	for i := range num {
+		x, y, monW, monH := robotgo.GetDisplayBounds(i)
+		monitors = append(monitors, display.Info{
+			Index:   i,
+			X:       x,
+			Y:       y,
+			Width:   monW,
+			Height:  monH,
+			Primary: i == 0,
+		})
+	}
+
+	if len(monitors) == 0 {
+		sw, sh := robotgo.GetScreenSize()
+		monitors = append(monitors, display.Info{
+			Index: 0, X: 0, Y: 0,
+			Width: sw, Height: sh, Primary: true,
+		})
+	}
+
+	return monitors, nil
 }

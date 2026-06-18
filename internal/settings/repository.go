@@ -13,11 +13,11 @@ type Repository struct {
 }
 
 type Settings struct {
-	CameraID       string
-	Sensitivity    float64
-	Smoothing      float64
-	StartupEnabled bool
-	ActiveProfile  string
+	CameraID        string
+	Sensitivity     float64
+	Smoothing       float64
+	StartupEnabled  bool
+	ActiveProfile   string
 	ActiveProfileID int
 }
 
@@ -103,8 +103,8 @@ func (r *Repository) migrate() error {
 		}
 	}
 
-	r.db.Exec(`ALTER TABLE gesture_mappings ADD COLUMN on_state TEXT NOT NULL DEFAULT 'active'`)
-	r.db.Exec(`ALTER TABLE gesture_mappings ADD COLUMN profile_id INTEGER NOT NULL DEFAULT 1`)
+	_, _ = r.db.Exec(`ALTER TABLE gesture_mappings ADD COLUMN on_state TEXT NOT NULL DEFAULT 'active'`)
+	_, _ = r.db.Exec(`ALTER TABLE gesture_mappings ADD COLUMN profile_id INTEGER NOT NULL DEFAULT 1`)
 
 	return r.seed()
 }

@@ -13,7 +13,7 @@ const (
 type Kind string
 
 const (
-	KindCamera         Kind = "camera"
-	KindAccessibility  Kind = "accessibility"
+	KindCamera          Kind = "camera"
+	KindAccessibility   Kind = "accessibility"
 	KindInputMonitoring Kind = "input_monitoring"
 )

@@ -30,7 +30,7 @@ func (e *Engine) SetMappings(ms *gestures.MappingStore) {
 	e.mappings = ms
 }
 
-func (e *Engine) Handle(event models.GestureEvent) {
+func (e *Engine) HandleGesture(event models.GestureEvent) {
 	if !e.tracking && event.Gesture != models.GestureOpenPalm {
 		return
 	}

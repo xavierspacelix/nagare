@@ -3,8 +3,18 @@ package settings
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/http"
+	"os"
 )
+
+var handlerLogger = slog.New(slog.NewTextHandler(os.Stderr, nil))
+
+func encodeJSON(w http.ResponseWriter, v interface{}) {
+	if err := json.NewEncoder(w).Encode(v); err != nil {
+		handlerLogger.Warn("json encode failed", "error", err)
+	}
+}
 
 func (s *SettingsServer) handleUI(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -22,7 +32,7 @@ func (s *SettingsServer) handleSettings(w http.ResponseWriter, r *http.Request) 
 			http.Error(w, `{"error":"load settings"}`, http.StatusInternalServerError)
 			return
 		}
-		json.NewEncoder(w).Encode(appSettings)
+		encodeJSON(w, appSettings)
 
 	case http.MethodPut:
 		var updated AppSettings
@@ -34,7 +44,7 @@ func (s *SettingsServer) handleSettings(w http.ResponseWriter, r *http.Request) 
 			http.Error(w, `{"error":"save settings"}`, http.StatusInternalServerError)
 			return
 		}
-		json.NewEncoder(w).Encode(updated)
+		encodeJSON(w, updated)
 
 	default:
 		http.Error(w, `{"error":"method not allowed"}`, http.StatusMethodNotAllowed)
@@ -43,7 +53,7 @@ func (s *SettingsServer) handleSettings(w http.ResponseWriter, r *http.Request) 
 
 func (s *SettingsServer) handleCameras(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(MockCameras)
+	encodeJSON(w, MockCameras)
 }
 
 func (s *SettingsServer) handleMappings(w http.ResponseWriter, r *http.Request) {
@@ -69,7 +79,7 @@ func (s *SettingsServer) handleMappings(w http.ResponseWriter, r *http.Request) 
 			http.Error(w, `{"error":"load mappings"}`, http.StatusInternalServerError)
 			return
 		}
-		json.NewEncoder(w).Encode(mappings)
+		encodeJSON(w, mappings)
 
 	case http.MethodPut:
 		var mappings []MappingDTO
@@ -81,7 +91,7 @@ func (s *SettingsServer) handleMappings(w http.ResponseWriter, r *http.Request) 
 			http.Error(w, `{"error":"save mappings"}`, http.StatusInternalServerError)
 			return
 		}
-		json.NewEncoder(w).Encode(mappings)
+		encodeJSON(w, mappings)
 
 	default:
 		http.Error(w, `{"error":"method not allowed"}`, http.StatusMethodNotAllowed)
@@ -98,7 +108,7 @@ func (s *SettingsServer) handleProfiles(w http.ResponseWriter, r *http.Request) 
 			http.Error(w, `{"error":"load profiles"}`, http.StatusInternalServerError)
 			return
 		}
-		json.NewEncoder(w).Encode(profiles)
+		encodeJSON(w, profiles)
 
 	case http.MethodPost:
 		var dto ProfileDTO
@@ -112,7 +122,7 @@ func (s *SettingsServer) handleProfiles(w http.ResponseWriter, r *http.Request) 
 			return
 		}
 		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode(created)
+		encodeJSON(w, created)
 
 	case http.MethodPut:
 		var dto ProfileDTO
@@ -124,7 +134,7 @@ func (s *SettingsServer) handleProfiles(w http.ResponseWriter, r *http.Request) 
 			http.Error(w, `{"error":"save profile"}`, http.StatusInternalServerError)
 			return
 		}
-		json.NewEncoder(w).Encode(dto)
+		encodeJSON(w, dto)
 
 	case http.MethodDelete:
 		idStr := r.URL.Query().Get("id")

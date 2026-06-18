@@ -17,7 +17,7 @@ func (p *Pipeline) Process(raw *camera.Frame) (*ProcessedFrame, error) {
 		return nil, fmt.Errorf("empty frame")
 	}
 
-	mat, err := gocv.NewMatFromBytes(raw.Height, raw.Width, gocv.MatTypeCV8U, raw.Data)
+	mat, err := gocv.NewMatFromBytes(raw.Height, raw.Width, gocv.MatTypeCV8UC3, raw.Data)
 	if err != nil {
 		return nil, fmt.Errorf("create mat from bytes: %w", err)
 	}

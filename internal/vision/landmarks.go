@@ -3,14 +3,15 @@ package vision
 import (
 	"fmt"
 	"log/slog"
+
 	"nagare/models"
 )
 
 type LandmarkConfig struct {
-	ModelPath     string
-	Confidence    float64
-	InputWidth    int
-	InputHeight   int
+	ModelPath   string
+	Confidence  float64
+	InputWidth  int
+	InputHeight int
 }
 
 func DefaultLandmarkConfig() LandmarkConfig {

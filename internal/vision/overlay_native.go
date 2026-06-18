@@ -22,11 +22,11 @@ type nativeOverlayImpl struct {
 }
 
 var (
-	landmarkColor      = color.RGBA{R: 91, G: 95, B: 248, A: 255}
-	connectionColor    = color.RGBA{R: 67, G: 71, B: 231, A: 255}
-	labelColor         = color.RGBA{R: 255, G: 255, B: 255, A: 255}
-	activeColor        = color.RGBA{R: 16, G: 185, B: 129, A: 255}
-	inactiveColor      = color.RGBA{R: 156, G: 163, B: 175, A: 255}
+	landmarkColor   = color.RGBA{R: 91, G: 95, B: 248, A: 255}
+	connectionColor = color.RGBA{R: 67, G: 71, B: 231, A: 255}
+	labelColor      = color.RGBA{R: 255, G: 255, B: 255, A: 255}
+	activeColor     = color.RGBA{R: 16, G: 185, B: 129, A: 255}
+	inactiveColor   = color.RGBA{R: 156, G: 163, B: 175, A: 255}
 )
 
 func newOverlayImpl(cfg OverlayConfig, logger *slog.Logger) (overlayImpl, error) {
