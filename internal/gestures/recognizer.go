@@ -92,6 +92,26 @@ func (r *Recognizer) IsSwipeRight(data *models.HandData) bool {
 	return dx > 20
 }
 
+func (r *Recognizer) IsScrollUp(data *models.HandData) bool {
+	if data == nil || data.Confidence < 0.5 {
+		return false
+	}
+	return data.Fingers.Index() == models.FingerExtended &&
+		data.Fingers.Middle() == models.FingerExtended &&
+		data.Fingers.Ring() == models.FingerFolded &&
+		data.Fingers.Pinky() == models.FingerFolded
+}
+
+func (r *Recognizer) IsScrollDown(data *models.HandData) bool {
+	if data == nil || data.Confidence < 0.5 {
+		return false
+	}
+	return data.Fingers.Index() == models.FingerExtended &&
+		data.Fingers.Middle() == models.FingerExtended &&
+		data.Fingers.Ring() == models.FingerFolded &&
+		data.Fingers.Pinky() == models.FingerFolded
+}
+
 func (r *Recognizer) ResetSwipe() {
 	r.palmCenter = models.HandLandmark{}
 }

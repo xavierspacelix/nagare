@@ -12,12 +12,14 @@ type EventHandler func(event models.GestureEvent)
 type Config struct {
 	OpenPalmThreshold time.Duration
 	PinchThreshold    time.Duration
+	StabilizerFrames  int
 }
 
 func DefaultConfig() Config {
 	return Config{
 		OpenPalmThreshold: 300 * time.Millisecond,
 		PinchThreshold:    100 * time.Millisecond,
+		StabilizerFrames:  3,
 	}
 }
 
@@ -27,6 +29,7 @@ type Machine struct {
 	states  map[models.Gesture]*gestureState
 	reco    *Recognizer
 	cm      *CooldownManager
+	stab    *Stabilizer
 	clock   func() time.Time
 	logger  *slog.Logger
 }
@@ -47,6 +50,7 @@ func NewMachine(cfg Config, handler EventHandler, logger *slog.Logger) *Machine 
 		states:  make(map[models.Gesture]*gestureState),
 		reco:    NewRecognizer(),
 		cm:      NewCooldownManager(250 * time.Millisecond),
+		stab:    NewStabilizer(cfg.StabilizerFrames),
 		clock:   time.Now,
 		logger:  logger,
 	}
@@ -69,6 +73,8 @@ func allGestures() []models.Gesture {
 		models.GestureTwoFingerDown,
 		models.GestureSwipeLeft,
 		models.GestureSwipeRight,
+		models.GestureScrollUp,
+		models.GestureScrollDown,
 	}
 }
 
@@ -84,11 +90,14 @@ func (m *Machine) Process(data *models.HandData) {
 	m.processGesture(now, data, models.GestureTwoFingerDown, m.reco.IsTwoFingersDown)
 	m.processGesture(now, data, models.GestureSwipeLeft, m.reco.IsSwipeLeft)
 	m.processGesture(now, data, models.GestureSwipeRight, m.reco.IsSwipeRight)
+	m.processGesture(now, data, models.GestureScrollUp, m.reco.IsScrollUp)
+	m.processGesture(now, data, models.GestureScrollDown, m.reco.IsScrollDown)
 }
 
 func (m *Machine) processGesture(now time.Time, data *models.HandData, gesture models.Gesture, check func(*models.HandData) bool) {
 	state := m.states[gesture]
-	active := check(data)
+	raw := check(data)
+	stable := m.stab.Record(gesture, raw)
 
 	if !m.cm.IsReady(gesture) && state.current != models.GestureIdle {
 		state.current = models.GestureIdle
@@ -96,14 +105,14 @@ func (m *Machine) processGesture(now time.Time, data *models.HandData, gesture m
 
 	switch state.current {
 	case models.GestureIdle:
-		if active {
+		if stable {
 			state.current = models.GestureStart
 			state.since = now
 			m.emit(gesture, models.GestureStart, data)
 		}
 
 	case models.GestureStart:
-		if !active {
+		if !stable {
 			state.current = models.GestureIdle
 			m.emit(gesture, models.GestureEnd, data)
 			break
@@ -127,7 +136,7 @@ func (m *Machine) processGesture(now time.Time, data *models.HandData, gesture m
 		}
 
 	case models.GestureActive:
-		if !active {
+		if !stable {
 			state.current = models.GestureEnd
 			state.since = now
 			m.emit(gesture, models.GestureEnd, data)
@@ -169,4 +178,8 @@ func (m *Machine) State(gesture models.Gesture) models.GestureState {
 
 func (m *Machine) Recognizer() *Recognizer {
 	return m.reco
+}
+
+func (m *Machine) Stabilizer() *Stabilizer {
+	return m.stab
 }

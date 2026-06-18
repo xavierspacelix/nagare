@@ -12,6 +12,8 @@ const (
 	GestureTwoFingerDown  Gesture = "two_fingers_down"
 	GestureSwipeLeft  Gesture = "swipe_left"
 	GestureSwipeRight Gesture = "swipe_right"
+	GestureScrollUp   Gesture = "scroll_up"
+	GestureScrollDown Gesture = "scroll_down"
 )
 
 type GestureState int

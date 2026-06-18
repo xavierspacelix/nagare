@@ -38,6 +38,8 @@ var DefaultMappings = []Mapping{
 	{Gesture: models.GestureTwoFingerDown, Action: ActionVolumeDown, OnState: models.GestureActive},
 	{Gesture: models.GestureSwipeLeft, Action: ActionMediaPrev, OnState: models.GestureActive},
 	{Gesture: models.GestureSwipeRight, Action: ActionMediaNext, OnState: models.GestureActive},
+	{Gesture: models.GestureScrollUp, Action: ActionScrollUp, OnState: models.GestureActive},
+	{Gesture: models.GestureScrollDown, Action: ActionScrollDown, OnState: models.GestureActive},
 }
 
 func LookupMapping(gesture models.Gesture, state models.GestureState) (Action, bool) {

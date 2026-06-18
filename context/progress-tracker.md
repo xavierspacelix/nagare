@@ -8,9 +8,9 @@ Update this file after every completed feature. Any AI agent reading this should
 
 **Phase:** Phase 1 — Foundation
 
-**Last Completed:** 09 Gesture State Machine
+**Last Completed:** 10 Core Gesture Recognition
 
-**Next:** 10 Core Gesture Recognition
+**Next:** 11 Gesture Stabilization
 
 ---
 
@@ -33,7 +33,7 @@ Update this file after every completed feature. Any AI agent reading this should
 ### Phase 3 — Gesture Engine
 
 * [x] 09 Gesture State Machine
-* [ ] 10 Core Gesture Recognition
+* [x] 10 Core Gesture Recognition
 * [ ] 11 Gesture Stabilization
 
 ### Phase 4 — OS Control Layer
@@ -201,6 +201,6 @@ Examples:
 
 ```text
 Phase: Phase 1 — Foundation
-Progress: 9 / 24 Features Completed
+Progress: 10 / 24 Features Completed
 Next Milestone: MediaPipe Hand Tracking
 ```

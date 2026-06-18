@@ -58,13 +58,19 @@ func indexMiddleExtended() models.FingerStates {
 	}
 }
 
+func stabilize(m *Machine, data *models.HandData) {
+	for range 3 {
+		m.Process(data)
+	}
+}
+
 func TestOpenPalm_IdleToStart(t *testing.T) {
 	events := []models.GestureEvent{}
 	m := NewMachine(DefaultConfig(), func(e models.GestureEvent) {
 		events = append(events, e)
 	}, nil)
 
-	m.Process(newHandData(allExtended(), false))
+	stabilize(m, newHandData(allExtended(), false))
 
 	if len(events) < 1 {
 		t.Fatal("expected at least one event")
@@ -85,12 +91,12 @@ func TestOpenPalm_StartToActive(t *testing.T) {
 
 	now := time.Now()
 	m.clock = func() time.Time { return now }
-
 	data := newHandData(allExtended(), false)
 
-	m.Process(data)
+	stabilize(m, data)
+
 	m.clock = func() time.Time { return now.Add(400 * time.Millisecond) }
-	m.Process(data)
+	stabilize(m, data)
 
 	foundActive := false
 	for _, e := range events {
@@ -113,8 +119,11 @@ func TestOpenPalm_ReleaseBeforeThreshold(t *testing.T) {
 	now := time.Now()
 	m.clock = func() time.Time { return now }
 
-	m.Process(newHandData(allExtended(), false))
-	m.Process(newHandData(allFolded(), false))
+	stabilize(m, newHandData(allExtended(), false))
+
+	now2 := time.Now()
+	m.clock = func() time.Time { return now2 }
+	stabilize(m, newHandData(allFolded(), false))
 
 	foundEnd := false
 	for _, e := range events {
@@ -136,13 +145,12 @@ func TestPinch_FullCycle(t *testing.T) {
 
 	now := time.Now()
 	m.clock = func() time.Time { return now }
-
 	data := newHandData(allExtended(), true)
 
-	m.Process(data)
+	stabilize(m, data)
 
 	m.clock = func() time.Time { return now.Add(200 * time.Millisecond) }
-	m.Process(data)
+	stabilize(m, data)
 
 	foundActive := false
 	for _, e := range events {
@@ -164,12 +172,11 @@ func TestCooldown_BlocksRapidTrigger(t *testing.T) {
 
 	now := time.Now()
 	m.clock = func() time.Time { return now }
-
 	data := newHandData(indexMiddleExtended(), false)
 
-	m.Process(data)
+	stabilize(m, data)
 	m.clock = func() time.Time { return now.Add(200 * time.Millisecond) }
-	m.Process(data)
+	stabilize(m, data)
 
 	activeCount := 0
 	for _, e := range events {
@@ -227,6 +234,72 @@ func TestRecognizer_LowConfidence(t *testing.T) {
 
 	if r.IsOpenPalm(data) {
 		t.Fatal("should not detect with low confidence")
+	}
+}
+
+func TestStabilizer_RequiresMultipleFrames(t *testing.T) {
+	s := NewStabilizer(3)
+
+	stable := s.Record(models.GestureOpenPalm, true)
+	if stable {
+		t.Fatal("expected not stable after 1 frame")
+	}
+
+	stable = s.Record(models.GestureOpenPalm, true)
+	if stable {
+		t.Fatal("expected not stable after 2 frames")
+	}
+
+	stable = s.Record(models.GestureOpenPalm, true)
+	if !stable {
+		t.Fatal("expected stable after 3 frames")
+	}
+}
+
+func TestStabilizer_NoiseFiltering(t *testing.T) {
+	s := NewStabilizer(3)
+
+	s.Record(models.GestureOpenPalm, true)
+	s.Record(models.GestureOpenPalm, true)
+	stable := s.Record(models.GestureOpenPalm, false)
+	if !stable {
+		t.Fatal("expected stable with majority true")
+	}
+
+	s2 := NewStabilizer(3)
+	s2.Record(models.GestureOpenPalm, true)
+	s2.Record(models.GestureOpenPalm, false)
+	stable = s2.Record(models.GestureOpenPalm, false)
+	if stable {
+		t.Fatal("expected not stable with minority true")
+	}
+}
+
+func TestStabilizer_Reset(t *testing.T) {
+	s := NewStabilizer(3)
+
+	s.Record(models.GestureOpenPalm, true)
+	s.Record(models.GestureOpenPalm, true)
+	s.Record(models.GestureOpenPalm, true)
+	s.Reset(models.GestureOpenPalm)
+
+	stable := s.Record(models.GestureOpenPalm, true)
+	if stable {
+		t.Fatal("expected not stable after reset")
+	}
+}
+
+func TestStabilizer_ResetAll(t *testing.T) {
+	s := NewStabilizer(3)
+
+	s.Record(models.GestureOpenPalm, true)
+	s.Record(models.GestureOpenPalm, true)
+	s.Record(models.GestureOpenPalm, true)
+	s.ResetAll()
+
+	stable := s.Record(models.GestureOpenPalm, true)
+	if stable {
+		t.Fatal("expected not stable after full reset")
 	}
 }
 
@@ -293,7 +366,7 @@ func TestMachine_EventHandler(t *testing.T) {
 		events = append(events, e)
 	}, nil)
 
-	m.Process(newHandData(allExtended(), false))
+	stabilize(m, newHandData(allExtended(), false))
 
 	if len(events) == 0 {
 		t.Fatal("expected at least one event")
