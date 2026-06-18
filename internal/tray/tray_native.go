@@ -84,6 +84,9 @@ func (a *App) listen(items menuItems) {
 			a.handle(ActionStop)
 
 		case <-items.openSettings.ClickedCh:
+			if a.onOpenSettings != nil {
+				a.onOpenSettings()
+			}
 			a.handle(ActionSettings)
 
 		case <-items.restartEngine.ClickedCh:

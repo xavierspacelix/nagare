@@ -38,7 +38,8 @@ func (a Action) String() string {
 }
 
 type App struct {
-	logger *slog.Logger
+	logger    *slog.Logger
+	onOpenSettings func()
 }
 
 func New(logger *slog.Logger) *App {
@@ -47,4 +48,8 @@ func New(logger *slog.Logger) *App {
 
 func (a *App) Logger() *slog.Logger {
 	return a.logger
+}
+
+func (a *App) SetOnOpenSettings(fn func()) {
+	a.onOpenSettings = fn
 }
