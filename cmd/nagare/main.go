@@ -21,7 +21,17 @@ func main() {
 		os.Exit(1)
 	}
 
-	settingsServer := settings.NewServer(logger)
+	dbPath := "nagare.db"
+	repo, err := settings.NewRepository(dbPath)
+	if err != nil {
+		logger.Error("failed to open database", "error", err)
+		os.Exit(1)
+	}
+	defer repo.Close()
+	logger.Info("database opened", "path", dbPath)
+
+	svc := settings.NewService(repo)
+	settingsServer := settings.NewServer(logger, svc)
 	app := tray.New(logger)
 
 	app.SetOnOpenSettings(func() {

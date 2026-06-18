@@ -8,9 +8,9 @@ Update this file after every completed feature. Any AI agent reading this should
 
 **Phase:** Phase 1 — Foundation
 
-**Last Completed:** 03 Settings Window
+**Last Completed:** 04 SQLite Persistence
 
-**Next:** 04 SQLite Persistence
+**Next:** 05 Camera Engine
 
 ---
 
@@ -21,7 +21,7 @@ Update this file after every completed feature. Any AI agent reading this should
 * [x] 01 Project Bootstrap
 * [x] 02 Tray Application
 * [x] 03 Settings Window
-* [ ] 04 SQLite Persistence
+* [x] 04 SQLite Persistence
 
 ### Phase 2 — Computer Vision Foundation
 
@@ -201,6 +201,6 @@ Examples:
 
 ```text
 Phase: Phase 1 — Foundation
-Progress: 3 / 24 Features Completed
-Next Milestone: SQLite Persistence
+Progress: 4 / 24 Features Completed
+Next Milestone: Camera Engine
 ```

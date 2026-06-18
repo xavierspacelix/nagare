@@ -14,15 +14,17 @@ type SettingsServer struct {
 	server  *http.Server
 	port    int
 	mux     *http.ServeMux
+	service *Service
 	started bool
 	mu      sync.Mutex
 }
 
-func NewServer(logger *slog.Logger) *SettingsServer {
+func NewServer(logger *slog.Logger, service *Service) *SettingsServer {
 	mux := http.NewServeMux()
 	return &SettingsServer{
-		logger: logger,
-		mux:    mux,
+		logger:  logger,
+		mux:     mux,
+		service: service,
 	}
 }
 
